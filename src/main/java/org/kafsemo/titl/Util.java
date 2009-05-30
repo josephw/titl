@@ -39,7 +39,7 @@ public class Util
         for (int i = 0; i < 4; i++) {
             ba[i] = (char) (tag >> ((3 - i) * 8) & 0xff);
         }
-        
+
         return new String(ba);
     }
 
@@ -49,17 +49,17 @@ public class Util
         if (ca.length != 4) {
             throw new IllegalArgumentException();
         }
-        
+
         int res = 0;
         for (int i = 0; i < 4; i++) {
             int c = ca[i];
             if (c > 0xff) {
                 throw new IllegalArgumentException();
             }
-            
+
             res |= (c << ((3 - i) * 8));
         }
-        
+
         return res;
     }
 
@@ -69,13 +69,13 @@ public class Util
         for (byte b : libraryPersistentId) {
             sb.append(String.format("%02X", b & 0xFF));
         }
-        
+
         return sb.toString();
     }
 
     /**
      * Converts a Windows path into a file: URL, as used by iTunes in its XML.
-     * 
+     *
      * @param p
      * @return
      */

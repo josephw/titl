@@ -33,11 +33,11 @@ public class Base64
         }
         return idx;
     }
-    
+
     public static byte[] decode(String s)
     {
         s = s.replaceAll("\\s+", "");
-        
+
         char[] ca = s.toCharArray();
 
         if (ca.length % 4 != 0)
@@ -46,23 +46,23 @@ public class Base64
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream((ca.length * 3 + 3) / 4);
-        
+
         for (int i = 0; i < ca.length; i += 4) {
             if (ca[i + 2] == PAD) {
                 int v1 = val(ca[i]),
                     v2 = val(ca[i + 1]);
-                
+
                 byte b1 = (byte) ((v1 << 2) | ((v2 >> 4) & 0x03));
-                
+
                 baos.write(b1);
             } else if (ca[i + 3] == PAD) {
                 int v1 = val(ca[i]),
                     v2 = val(ca[i + 1]),
                     v3 = val(ca[i + 2]);
-                
+
                 byte b1 = (byte) ((v1 << 2) | ((v2 >> 4) & 0x03));
                 byte b2 = (byte) (((v2 << 4) & 0xF0) | ((v3 >> 2) & 0x0F));
-                
+
                 baos.write(b1);
                 baos.write(b2);
             } else {
@@ -70,17 +70,17 @@ public class Base64
                     v2 = val(ca[i + 1]),
                     v3 = val(ca[i + 2]),
                     v4 = val(ca[i + 3]);
-                
+
                 byte b1 = (byte) ((v1 << 2) | ((v2 >> 4) & 0x03));
                 byte b2 = (byte) (((v2 << 4) & 0xF0) | ((v3 >> 2) & 0x0F));
                 byte b3 = (byte) (((v3 << 6) & 0x40) | v4);
-                
+
                 baos.write(b1);
                 baos.write(b2);
                 baos.write(b3);
             }
         }
-        
+
         return baos.toByteArray();
     }
 }

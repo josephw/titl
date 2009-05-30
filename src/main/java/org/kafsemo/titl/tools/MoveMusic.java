@@ -30,13 +30,13 @@ import org.kafsemo.titl.ProcessLibrary;
  * A command-line tool to process a music library and move all music files from one directory
  * to another. If you move the files on disk at the same time, processing with this tool
  * will make the app pick them up from the new location.
- * 
+ *
  * @author Joseph
  */
 public class MoveMusic implements ProcessLibrary.StringConverter
 {
     private final String origDir, destDir;
-    
+
     public MoveMusic(String string, String string2)
     {
         origDir = string;
@@ -56,18 +56,18 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         if (hasSlash(mm.origDir) != hasSlash(mm.destDir)) {
             System.err.println("Inconsistent paths - one ends with a slash and one doesn't");
         }
-        
+
         ProcessLibrary pl = new ProcessLibrary();
         pl.register(0x0d, mm);
-        
+
         File f = new File(args[0]);
-        
+
         File f2 = new File(f.getParentFile(), f.getName() + ".processed");
         if (f2.exists()) {
             System.err.println("Target file already exists - exiting");
             System.exit(10);
         }
-        
+
         OutputStream out = new FileOutputStream(f2);
         try {
             pl.process(f, out);
@@ -80,7 +80,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
     {
         return s.endsWith("/") || s.endsWith("\\");
     }
-    
+
     public String convert(String s)
     {
         if (s.startsWith(origDir)) {

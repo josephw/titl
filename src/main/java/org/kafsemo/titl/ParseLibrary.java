@@ -42,30 +42,30 @@ import java.util.Date;
 /**
  * Development class to parse a library file. Fails as quickly as possibly
  * on unknown structure. Saves the unobfuscated contents in a new file.
- * 
+ *
  * @author Joseph
  */
 public class ParseLibrary
 {
     private final Collection<Playlist> playlists = new ArrayList<Playlist>();
-    
+
     private Playlist currentPlaylist;
-    
+
     private Collection<Podcast> podcasts = new ArrayList<Podcast>();
-    
+
     private Collection<Track> tracks = new ArrayList<Track>();
-    
+
     private Track currentTrack;
-    
+
     public static void main(String[] args) throws Exception
     {
         if (args.length != 1) {
             System.err.println("Usage: ParseLibrary <iTunes Library.itl>");
             System.exit(5);
         }
-        
+
         File f = new File(args[0]);
-        
+
         Library lib = parse(f);
 
         OutputStream out = new FileOutputStream("decrypted-file");
@@ -85,70 +85,70 @@ public class ParseLibrary
 //                    break;
 //                }
 //            }
-//            
+//
 //            if (matched) {
 //                return i;
 //            }
 //        }
-//        
+//
 //        return -1;
 //    }
-    
+
     public static Library parse(File f) throws IOException, ItlException
     {
         long fileLength = f.length();
-        
+
         InputStream in = new FileInputStream(f);
-        
+
         DataInputStream di = new DataInputStream(in);
-        
+
         Hdfm hdr = Hdfm.read(di, fileLength);
-        
+
 //        System.out.println("Version: " + hdr.version);
-        
+
         ParseLibrary pl = new ParseLibrary();
-        
+
         String path = pl.drain(new DataInputStream(new ByteArrayInputStream(hdr.fileData)), hdr.fileData.length);
-        
+
         Library library = new Library(hdr, path, pl.playlists, pl.podcasts, pl.tracks);
         return library;
     }
-    
+
     private String drain(DataInput di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException
     {
         int remaining = totalLength;
-        
+
         boolean going = true;
-        
+
         while(going)
         {
             int consumed = 0;
             String type = Util.toString(di.readInt());
             consumed += 4;
-            
+
             int length = di.readInt();
             consumed += 4;
 //            System.out.println(type + ": " + length);
 
             int recLength;
-            
+
             if(type.equals("hohm"))
             {
                 recLength = di.readInt();
                 consumed += 4;
-                
+
 //                System.out.println("HOHM length: " + recLength);
-                
+
                 int hohmType = di.readInt();
                 consumed += 4;
-                
+
 //                System.out.printf("hohm type: 0x%02x - ", hohmType);
-                
+
                 switch (hohmType)
                 {
                     case 1:
                         throw new IOException("Looks complicated...");
-                    
+
                     case 0x02: // Track title
                         String trackTitle = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -157,7 +157,7 @@ public class ParseLibrary
                         currentTrack.setName(trackTitle);
                         consumed = recLength;
                         break;
-                    
+
                     case 0x03: // Album title
                         String albumTitle = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -166,7 +166,7 @@ public class ParseLibrary
                         currentTrack.setAlbum(albumTitle);
                         consumed = recLength;
                         break;
-                    
+
                     case 0x04: // Artist
                         String artist = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -175,7 +175,7 @@ public class ParseLibrary
                         currentTrack.setArtist(artist);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x05: // Genre
                         String genre = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -184,7 +184,7 @@ public class ParseLibrary
                         currentTrack.setGenre(genre);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x06: // Kind
                         String kind = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -194,18 +194,18 @@ public class ParseLibrary
                         consumed = recLength;
 //                        System.out.println("Kind: " + kind);
                         break;
-                        
+
                     case 0x0b: // Local path as URL XXX
                         String url = readGenericHohm(di);
 
                         if (currentTrack == null) {
                             throw new ItlException("Podcast URL with no track defined");
                         }
-                        
+
                         currentTrack.setLocalUrl(url);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x0d: // Location
                         String location = readGenericHohm(di);
                         if (currentTrack == null) {
@@ -214,15 +214,15 @@ public class ParseLibrary
                         currentTrack.setLocation(location);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x13: // Download URL for podcast item
                         di.readInt(); // Index?
                         expectZeroBytes(di, 4);
                         consumed += 8;
-                        
+
                         byte[] ba = new byte[recLength - consumed];
                         di.readFully(ba);
-                        
+
                         String trackUrl = toString(ba);
                         if (currentTrack == null) {
                             throw new ItlException("URL with no track defined");
@@ -230,19 +230,19 @@ public class ParseLibrary
                         currentTrack.setUrl(trackUrl);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x25: // Podcast URL for item
                         String pcUrl = readGenericHohm(di);
-                        
+
                         if (currentTrack == null) {
                             throw new ItlException("Podcast URL with no track defined");
                         }
-                        
+
                         currentTrack.setPodcastUrl(pcUrl);
 //                        System.out.println("Podcast URL for item");
                         consumed = recLength;
                         break;
-                        
+
                     case 0x64: // (Smart?) Playlist title
                         String title = readGenericHohm(di);
 //                        if (!title.equals("####!####")) {
@@ -264,13 +264,13 @@ public class ParseLibrary
                         ((Podcast) currentTrack).setPodcastLocation(pcFeedUrl);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x190: // Podcast author (multiple)
                         String pcAuthor = readGenericHohm(di);
                         ((Podcast) currentTrack).addPodcastAuthor(pcAuthor);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x12C: // Podcast title
                         String pcTitle = readGenericHohm(di);
                         ((Podcast) currentTrack).setPodcastTitle(pcTitle);
@@ -282,21 +282,21 @@ public class ParseLibrary
                         currentTrack.setItunesKeywords(keywords);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x12: // Subtitle?
                         String subtitleOrFeedLink = readGenericHohm(di);
                         currentTrack.setItunesSubtitle(subtitleOrFeedLink);
 //                        currentTrack.setFeedLink(subtitleOrFeedLink);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x15: // (Only present in full DB)
                         hexDumpBytes(di, recLength - consumed);
 //                        String v = readGenericHohm(di);
 //                        System.out.println(v);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x16: // iTunes summary?
                         String summary = readGenericHohm(di);
                         currentTrack.setItunesSummary(summary);
@@ -309,7 +309,7 @@ public class ParseLibrary
 //                        System.out.println(v);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x09: // iTunes category?
 
                     case 0x08:
@@ -330,10 +330,10 @@ public class ParseLibrary
 //                        System.out.println(val);
                         consumed = recLength;
                         break;
-                    
+
                     case 0x65: // Smart criteria
                         expectZeroBytes(di, 8);
-                        
+
                         byte[] smartCriteria = new byte[recLength - consumed - 8];
                         di.readFully(smartCriteria);
                         if (currentPlaylist.smartCriteria != null)
@@ -344,10 +344,10 @@ public class ParseLibrary
                         consumed = recLength;
 //                        System.out.println("Smart criteria");
                         break;
-                        
+
                     case 0x66: // Smart info
                         expectZeroBytes(di, 8);
-                        
+
                         byte[] smartInfo = new byte[recLength - consumed - 8];
                         di.readFully(smartInfo);
                         if (currentPlaylist.smartInfo != null)
@@ -358,7 +358,7 @@ public class ParseLibrary
                         consumed = recLength;
 //                        System.out.println("Smart info");
                         break;
-                        
+
                     case 0x67: // Podcast info?
                         byte[] pcInf = new byte[recLength - consumed];
 //                        arrayDumpBytes(di, pcInf.length);
@@ -381,7 +381,7 @@ public class ParseLibrary
                         di.skipBytes(recLength - consumed);
                         consumed = recLength;
                         break;
-                        
+
                     default:
                         throw new IOException("Unknown type: " + hohmType);
                 }
@@ -424,19 +424,19 @@ public class ParseLibrary
 //                consumed = length;
                 throw new ItlException("Unhandled type: " + type);
             }
-            
+
             remaining -= consumed;
         }
-        
+
         byte[] footerBytes = new byte[remaining];
         di.readFully(footerBytes);
-        
+
         String footer = new String(footerBytes, "iso-8859-1");
 //        System.out.println("Footer: " + footer);
-        
+
         return footer;
     }
-    
+
     static void hexDump(DataInput di, int count) throws IOException
     {
         for (int i = 0; i < count; i++) {
@@ -444,7 +444,7 @@ public class ParseLibrary
 //            System.out.printf("%3d 0x%08x %4s\n", i, v, Util.toString(v));
         }
     }
-    
+
     static void hexDumpBytes(DataInput di, int count) throws IOException
     {
         for (int i = 0; i < count; i++) {
@@ -452,19 +452,19 @@ public class ParseLibrary
 //            System.out.printf("%3d 0x%02x %4s\n", i, v, (v == 0 ? ' ' : (char) v));
         }
     }
-    
+
 //    Byte   Length  Comment
 //    -----------------------
 //      0'     12      ?
 //     12       4      N = length of data
 //     16       8      ?
-//     24       N      data    
-    
+//     24       N      data
+
     static String readGenericHohm(DataInput di) throws IOException, ItlException
     {
         byte[] unknown = new byte[12];
         di.readFully(unknown);
-        
+
         int dataLength = di.readInt();
         byte[] alsoUnknown = new byte[8];
         di.readFully(alsoUnknown);
@@ -473,7 +473,7 @@ public class ParseLibrary
                 throw new ItlException("Expected zeroes in HOHM block");
             }
         }
-        
+
         byte[] data = new byte[dataLength];
         di.readFully(data);
 
@@ -484,36 +484,36 @@ public class ParseLibrary
 //        } finally {
 //            w.close();
 //        }
-        
+
 //        String s;
 
         return toString(data, unknown[11]);
     }
-    
+
     static int fail = 0;
-    
+
     public static String toString(byte[] data) throws UnsupportedEncodingException
     {
         return new String(data, guessEncoding(data));
     }
-    
+
     public static String toString(byte[] data, byte encodingFlag) throws ItlException, UnsupportedEncodingException
     {
         switch (encodingFlag) {
         case 0: // Seems only to be used for URLs
             return new String(data, "us-ascii");
-        
+
         case 1:
             return new String(data, "utf-16be");
-            
+
         case 3:
             return new String(data, "windows-1252");
-            
+
         default:
             throw new ItlException("Unknown encoding type " + encodingFlag + " for string: " + new String(data));
         }
     }
-    
+
     public static String guessEncoding(byte[] data) throws UnsupportedEncodingException
     {
         if(data.length > 1 && data.length % 2 == 0 && data[0] == 0)
@@ -525,27 +525,27 @@ public class ParseLibrary
             return "iso-8859-1";
         }
     }
-    
+
 //    Byte   Length  Comment
 //    -----------------------
 //      0       4     'hdsm'
 //      4       4     L = header length
 //      8       4     ?
 //     12       4     block type ?
-//     16      L-16   ?    
+//     16      L-16   ?
     static boolean readHdsm(DataInput di, int length) throws IOException
     {
         // Assume header and length already read
-        
+
         int unknown = di.readInt();
         int blockType = di.readInt();
-        
+
         di.skipBytes(length - 16);
-        
+
 //        System.out.println("HDSM block type: " + blockType);
         return (blockType == 4);
     }
-    
+
 //    Byte   Length  Comment
 //    -----------------------
 //      0       4      hpim
@@ -557,9 +557,9 @@ public class ParseLibrary
     {
         int unknownA = di.readInt();
         int unknownB = di.readInt();
-        
+
         int itemCount = di.readInt();
-        
+
 //        System.out.println("HPIM items: " + itemCount);
 //        System.out.printf("0x%04x%04x\n", unknownA, unknownB);
 
@@ -568,30 +568,30 @@ public class ParseLibrary
 
         byte[] ppid = new byte[8];
         System.arraycopy(remaining, 420, ppid, 0, ppid.length);
-        
+
         currentPlaylist = new Playlist();
         currentPlaylist.ppid = ppid;
         playlists.add(currentPlaylist);
     }
-    
+
     private void readHptm(DataInput di, int length) throws IOException, ItlException
     {
         byte[] unknown = new byte[16];
         di.readFully(unknown);
-        
+
         int key = di.readInt();
-        
+
 //        System.out.println(" Key: " + key);
-        
+
         if (currentPlaylist == null) {
             throw new ItlException("Playlist item outside playlist content");
         }
-        
+
         currentPlaylist.addItem(key);
-        
+
         di.skipBytes(length - 28);
     }
-    
+
 //    Byte   Length  Comment
 //    -----------------------
 //      0       4     'htim'
@@ -643,47 +643,47 @@ public class ParseLibrary
 
         Track track = new Track();
         track.setTrackId(songId);
-        
+
 //         24       4     ?
 //         28       4     Mac OS file type (e.g. MPG3)
         di.skipBytes(8);
-        
+
 //         32       4     modification date
         int modificationDate = di.readInt();
         track.setDateModified(Dates.fromMac(modificationDate));
 //        System.out.println("Modification date: " + Dates.fromMac(modificationDate));
-        
+
 //         36       4     file size, in bytes
         int fileSize = di.readInt();
         track.setSize(fileSize);
 //        System.out.println("File size: " + fileSize);
 
-        
+
 //         40       4     playtime, millisecs
         int playtimeMillis = di.readInt();
         track.setTotalTime(playtimeMillis);
-        
+
 //         44       4     track number
 //         48       4     total number of tracks
 //         52       2     ?
         di.skipBytes(10);
-        
+
 //         54       2     year
         int year = di.readShort();
         track.setYear(year);
-        
+
 //         56       2     ?
         di.skipBytes(2);
-        
+
 //         58       2     bit rate
         track.setBitRate(di.readShort());
-        
+
 //         60       2     sample rate
         track.setSampleRate(di.readShort());
-        
+
 //         62       2     ?
         int x = di.readShort();
-        
+
 //         64       4     volume adjustment (signed)
 
 //         68       4     start time, milliseconds
@@ -692,47 +692,47 @@ public class ParseLibrary
 
 //         76       4     playcount
         int playcount = di.readInt();
-        
+
 //         80       2     ?
 //         82       2     compilation (1 = yes, 0 = no)
 //         84      12     ?
         di.skipBytes(16);
-        
+
 //         96       4     playcount again?
         int playcountAgain = di.readInt();
         if (playcount != playcountAgain && playcountAgain != 0 && playcountAgain != 1)
         {
 //            throw new IOException(playcount + " != " + playcountAgain);
         }
-        
+
 //        System.out.println("Play count: " + playcount);
-        
+
 //        100       4     last play date
         int lastPlayDate = di.readInt();
-        
+
 //        104       2     disk number
 //        106       2     total disks
         di.skipBytes(4);
-        
+
 //        108       1     rating ( 0 to 100 )
         int rating = di.readUnsignedByte();
         track.setRating(rating);
-        
+
 //        109      11     ?
         di.skipBytes(11);
-        
+
 //        120       4     add date
         int addDate = di.readInt();
         track.setDateAdded(Dates.fromMac(addDate));
-        
+
 //        124      32     ?
         di.skipBytes(32);
-        
+
 //        System.out.println("Last play date: " + Dates.fromMac(lastPlayDate));
 //        System.out.println("Add date: " + Dates.fromMac(addDate));
-        
+
         di.skipBytes(length - 156);
-        
+
         tracks.add(track);
         currentTrack = track;
 
@@ -747,20 +747,20 @@ public class ParseLibrary
             return 0;
         }
     }
-    
+
     /* A Podcast header? */
     void readHaim(DataInput di, int length) throws ItlException, IOException
     {
         Podcast p = new Podcast();
         podcasts.add(p);
-        
+
         currentTrack = p;
-        
+
         hexDumpBytes(di, length);
-        
+
 //        di.skipBytes(length);
     }
-    
+
     static void arrayDumpBytes(String type, int length, int recLength, int hohmType,
             DataInput di, int remaining) throws IOException
     {
@@ -770,13 +770,13 @@ public class ParseLibrary
         out.writeInt(length);
         out.writeInt(recLength);
         out.writeInt(hohmType);
-        
+
         for (int i = 0; i < remaining; i++) {
             out.writeByte(di.readByte());
         }
-        
+
         byte[] ba = baos.toByteArray();
-        
+
         for (int i = 0; i < ba.length; i++) {
             if (i > 0)
             {
@@ -787,11 +787,11 @@ public class ParseLibrary
             } else {
                 System.out.print(" ");
             }
-            
+
             System.out.printf("0x%02x", ba[i]);
         }
     }
-    
+
     static void arrayDumpBytes(DataInput di, int remaining) throws IOException
     {
         for (int i = 0; i < remaining; i++) {
@@ -804,7 +804,7 @@ public class ParseLibrary
             } else {
                 System.out.print(" ");
             }
-            
+
             byte b = di.readByte();
             if (b < 0) {
                 System.out.printf("(byte) 0x%02x", b);
@@ -813,7 +813,7 @@ public class ParseLibrary
             }
         }
     }
-    
+
     static void expectZeroBytes(DataInput di, int count) throws IOException, ItlException
     {
         for (int i = 0; i < count; i++) {

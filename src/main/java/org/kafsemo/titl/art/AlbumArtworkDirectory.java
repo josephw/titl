@@ -26,14 +26,14 @@ import java.util.List;
 
 /**
  * Discovers all the files in the artwork directory.
- * 
+ *
  * @author Joseph
  */
 public class AlbumArtworkDirectory implements Iterable<File>
 {
     private final File dir;
     private final List<File> files;
-    
+
     public AlbumArtworkDirectory(String dirName)
     {
         this(new File(dirName));
@@ -51,7 +51,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
         recurse(dir);
         Collections.shuffle(files);
     }
-    
+
     private void recurse(File f)
     {
         if (f.isFile()) {
@@ -65,7 +65,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
             }
         }
     }
-    
+
     @Override
     public Iterator<File> iterator()
     {

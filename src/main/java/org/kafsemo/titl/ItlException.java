@@ -21,7 +21,7 @@ package org.kafsemo.titl;
 
 /**
  * An exception with the structure of a library file.
- * 
+ *
  * @author Joseph
  */
 public class ItlException extends Exception
@@ -30,7 +30,7 @@ public class ItlException extends Exception
     {
         super(message, cause);
     }
-    
+
     public ItlException(String message)
     {
         super(message);

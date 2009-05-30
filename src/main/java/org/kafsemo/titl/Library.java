@@ -24,7 +24,7 @@ import java.util.Collections;
 
 /**
  * A high-level view of a library, including all the data extracted.
- * 
+ *
  * @author Joseph
  */
 public class Library
@@ -34,7 +34,7 @@ public class Library
     private final Collection<Playlist> playlists;
     private final Collection<Podcast> podcasts;
     private final Collection<Track> tracks;
-    
+
     public Library(Hdfm header, String path, Collection<Playlist> playlists, Collection<Podcast> podcasts, Collection<Track> tracks)
     {
         this.hdr = header;
@@ -43,12 +43,12 @@ public class Library
         this.podcasts = podcasts;
         this.tracks = tracks;
     }
-    
+
     public String getVersion()
     {
         return hdr.version;
     }
-    
+
     public String getMusicFolder()
     {
         return path;
@@ -57,16 +57,16 @@ public class Library
     public byte[] getLibraryPersistentId()
     {
         byte[] lpid = new byte[8];
-        
+
         System.arraycopy(hdr.headerRemainder, 30, lpid, 0, lpid.length);
-        
+
         return lpid;
     }
 
     public Collection<String> getPlaylistNames()
     {
         Collection<String> titles = new ArrayList<String>(playlists.size());
-        
+
         for (Playlist pl : playlists)
         {
             String title = pl.getTitle();
@@ -74,7 +74,7 @@ public class Library
                 titles.add(title);
             }
         }
-        
+
         return titles;
     }
 

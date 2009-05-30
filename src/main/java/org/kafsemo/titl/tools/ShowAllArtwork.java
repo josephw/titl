@@ -36,7 +36,7 @@ import org.kafsemo.titl.art.ExtractArt;
 
 /**
  * Simple hack to display all iTunes artwork in a rapid collage.
- * 
+ *
  * @author Joseph
  */
 public class ShowAllArtwork
@@ -47,33 +47,33 @@ public class ShowAllArtwork
             System.err.println("Usage: ShowAllArtwork <iTunes directory>");
             System.exit(5);
         }
-        
+
         String iTunesDirectory = args[0];
-        
+
         JFrame jf = new JFrame();
         JPanel jp = new JPanel();
         jp.setPreferredSize(new Dimension(500, 500));
         jf.getContentPane().add(jp);
-        
+
         jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         jf.pack();
         jf.setVisible(true);
-        
+
         AlbumArtworkDirectory aad = new AlbumArtworkDirectory(new File(iTunesDirectory, "Album Artwork"));
         aad.scan();
-        
+
         Random r = new Random();
-        
+
         for (File f : aad) {
             Collection<byte[]> streams = ExtractArt.extract(f);
-            
+
             for (byte[] ba : streams) {
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(ba));
-                
+
                 Dimension d = jp.getSize();
-                
+
                 int x, y;
-                
+
                 if (img.getWidth() <= d.width && img.getHeight() <= d.height) {
                     x = r.nextInt(d.width - img.getWidth());
                     y = r.nextInt(d.height - img.getHeight());
@@ -81,7 +81,7 @@ public class ShowAllArtwork
                     x = (d.width - img.getWidth()) / 2;
                     y = (d.height - img.getHeight()) / 2;
                 }
-                
+
                 jp.getGraphics().drawImage(img, x, y, null);
             }
         }

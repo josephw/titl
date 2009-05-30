@@ -34,18 +34,18 @@ import java.util.Map;
 
 /**
  * A processor that can be configured with callbacks to modify any particular string field.
- * 
+ *
  * @author Joseph
  */
 public class ProcessLibrary
 {
     private final Map<Integer, StringConverter> converters = new HashMap<Integer, StringConverter>();
-    
+
     public void process(File inFile, OutputStream outStr) throws IOException, ItlException
     {
         /* Read the original library in */
         Hdfm hdfm;
-        
+
         InputStream inStr = new FileInputStream(inFile);
         try {
             DataInput di = new DataInputStream(inStr);
@@ -56,34 +56,34 @@ public class ProcessLibrary
 
         /* Modify... */
         ByteArrayOutputStream dto = new ByteArrayOutputStream();
-        
+
         process(new DataInputStream(new ByteArrayInputStream(hdfm.fileData)), hdfm.fileData.length, new DataOutputStream(dto));
-        
+
         /* ...and write out */
         DataOutput out = new DataOutputStream(outStr);
-        
+
         hdfm.write(out, dto.toByteArray());
     }
 
     void process(DataInput di, int totalLength, DataOutput out) throws IOException, ItlException
     {
         int remaining = totalLength;
-        
+
         boolean going = true;
-        
+
         while(going)
         {
             int consumed = 0;
             String type = Util.toString(di.readInt());
             consumed += 4;
-            
+
             int length = di.readInt();
             consumed += 4;
 
             if(type.equals("hohm")) {
                 int recLength = di.readInt();
                 consumed += 4;
-                
+
                 Integer hohmType = Integer.valueOf(di.readInt());
                 consumed += 4;
 
@@ -94,43 +94,43 @@ public class ProcessLibrary
                 if (sc != null) {
                     ba = mapHohm(new DataInputStream(new ByteArrayInputStream(ba)), sc);
                 }
-                
+
                 /* Write out again */
                 out.writeInt(Util.fromString(type));
                 out.writeInt(length);
-                
+
                 out.writeInt(ba.length + consumed);
                 out.writeInt(hohmType);
-                
+
                 out.write(ba);
-                
+
                 remaining -= (recLength);
-                
+
             } else {
                 byte[] ba = new byte[length - consumed];
-                
+
                 di.readFully(ba);
-                
+
                 /* Did we hit the end? */
                 if(type.equals("hdsm")) {
                     going = !ParseLibrary.readHdsm(new DataInputStream(new ByteArrayInputStream(ba)), ba.length);
                 }
-                
+
                 remaining -= length;
-                
+
                 /* Write out again */
                 out.writeInt(Util.fromString(type));
                 out.writeInt(ba.length + 8);
                 out.write(ba);
             }
         }
-        
+
         byte[] footerBytes = new byte[remaining];
         di.readFully(footerBytes);
-        
+
 //        String footer = new String(footerBytes, "iso-8859-1");
 //        System.out.println("Footer: " + footer);
-        
+
         out.write(footerBytes);
     }
 
@@ -139,11 +139,11 @@ public class ProcessLibrary
         /* Read in */
         byte[] unknown = new byte[12];
         di.readFully(unknown);
-        
+
         int dataLength = di.readInt();
         byte[] alsoUnknown = new byte[8];
         di.readFully(alsoUnknown);
-        
+
         byte[] data = new byte[dataLength];
         di.readFully(data);
 
@@ -154,17 +154,17 @@ public class ProcessLibrary
         /* Write out */
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutput out = new DataOutputStream(baos);
-        
+
         /* Choose the necessary character encoding */
         Encoding enc = chooseEncoding(s);
-        
+
         unknown[11] = enc.code;
         byte[] newData = s.getBytes(enc.name);
         out.write(unknown);
         out.writeInt(newData.length);
         out.write(alsoUnknown);
         out.write(newData);
-        
+
         return baos.toByteArray();
     }
 
@@ -175,13 +175,13 @@ public class ProcessLibrary
                 return Encoding.UTF16BE;
             }
         }
-        
+
         return Encoding.ISO88591;
     }
-    
+
     /**
      * Register a converter for a particular HOHM type.
-     * 
+     *
      * <ul>
      * <li>0x02 - Track title
      * <li>0x0d - Location
@@ -191,23 +191,23 @@ public class ProcessLibrary
     {
         converters.put(Integer.valueOf(hohmType), cnvtr);
     }
-    
+
     public enum Encoding
     {
         UNSPECIFIED((byte) 0, "iso-8859-1"),
         UTF16BE((byte) 1, "utf-16be"),
         ISO88591((byte) 3, "iso-8859-1");
-        
+
         private final byte code;
         private final String name;
-        
+
         Encoding(byte c, String n)
         {
             this.code = c;
             this.name = n;
         }
     }
-    
+
     public interface StringConverter
     {
         String convert(String s);

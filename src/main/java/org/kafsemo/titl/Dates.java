@@ -30,28 +30,28 @@ public class Dates
     {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
+
         return df.format(d);
     }
-    
+
     public static Date fromMac(long seconds)
     {
         if (seconds == 0)
         {
             return null;
         }
-        
+
         seconds &= 0xFFFFFFFFL;
-        
+
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("Europe/London"));
         cal.clear();
         cal.set(Calendar.YEAR, 1904);
         cal.set(Calendar.MONTH, 0);
         cal.set(Calendar.DATE, 1);
-        
+
         long epoch = cal.getTimeInMillis() - 60 * 60 * 1000L;
-        
+
         return new Date((seconds * 1000L) + epoch);
     }
 }

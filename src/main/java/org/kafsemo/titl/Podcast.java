@@ -27,12 +27,12 @@ public class Podcast extends Track
     private String podcastUrl;
     private String podcastTitle;
     private Collection<String> podcastAuthors = new ArrayList<String>();
-    
+
     public String getPodcastLocation()
     {
         return podcastUrl;
     }
-    
+
     public void setPodcastLocation(String l)
     {
         this.podcastUrl = l;
@@ -42,7 +42,7 @@ public class Podcast extends Track
     {
         return podcastTitle;
     }
-    
+
     public void setPodcastTitle(String t)
     {
         this.podcastTitle = t;
@@ -52,7 +52,7 @@ public class Podcast extends Track
     {
         return Collections.unmodifiableCollection(podcastAuthors);
     }
-    
+
     public void addPodcastAuthor(String author)
     {
         this.podcastAuthors.add(author);

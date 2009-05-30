@@ -34,7 +34,7 @@ public class Hdfm
     public final int unknown;
     final byte[] headerRemainder;
     public final byte[] fileData;
-    
+
     private Hdfm(String version, int unknown, byte[] headerRemainder, byte[] fileData)
     {
         this.version = version;
@@ -42,7 +42,7 @@ public class Hdfm
         this.headerRemainder = headerRemainder;
         this.fileData = fileData;
     }
-    
+
 //    Byte   Length  Comment
 //    -----------------------
 //      0       4     'hdfm'
@@ -56,28 +56,28 @@ public class Hdfm
     {
         int hdr = di.readInt();
         assertEquals("hdfm", Util.toString(hdr));
-        
+
         int hl = di.readInt();
-        
+
         int fl = di.readInt();
         if (fileLength != fl)
         {
             throw new IOException("Disk file is " + fileLength + " but header claims " + fl);
         }
-        
+
         int unknown = di.readInt();
-        
+
         int vsl = di.readUnsignedByte();
         byte[] avs = new byte[vsl];
         di.readFully(avs);
-        
+
         String version = new String(avs, "us-ascii");
-        
+
         int consumed = vsl + 17;
-        
+
         byte[] headerRemainder = new byte[hl - consumed];
         di.readFully(headerRemainder);
-    
+
         consumed += headerRemainder.length;
 
         if (hl != consumed)
@@ -86,21 +86,21 @@ public class Hdfm
         }
 
         byte[] restOfFile = new byte[(int)fileLength - consumed];
-        
+
         di.readFully(restOfFile);
 
         byte[] decrypted = new byte[restOfFile.length];
-        
+
         /* Decrypt */
         decrypted = crypt(restOfFile, Cipher.DECRYPT_MODE);
-        
+
         return new Hdfm(version, unknown, headerRemainder, decrypted);
     }
 
     /**
      * Obfuscation description from
      * <a href="http://search.cpan.org/src/BDFOY/Mac-iTunes-0.90/examples/crypt-rijndael.pl">this sample</a>.
-     * 
+     *
      * @param orig
      * @param mode
      * @return
@@ -110,17 +110,17 @@ public class Hdfm
     private static byte[] crypt(byte[] orig, int mode) throws UnsupportedEncodingException, ItlException
     {
         byte[] res = new byte[orig.length];
-        
+
         /* Decrypt */
         try {
             byte[] rawKey = "BHUILuilfghuila3".getBytes("us-ascii");
-    
+
             SecretKeySpec skeySpec = new SecretKeySpec(rawKey, "AES");
             Cipher cip = Cipher.getInstance("AES/ECB/NoPadding");
             cip.init(mode, skeySpec);
-    
+
             int x = orig.length % 16;
-            
+
             byte[] result = cip.doFinal(orig, 0, orig.length - x);
             System.arraycopy(result, 0, res, 0, result.length);
             System.arraycopy(orig, result.length, res, result.length, x);
@@ -133,41 +133,41 @@ public class Hdfm
                 throw new ItlException("Unable to perform operation", gse);
             }
         }
-        
+
         return res;
     }
-    
+
     public void write(DataOutput o) throws IllegalArgumentException, IOException, ItlException
     {
         write(o, fileData);
     }
-    
+
     public void write(DataOutput o, byte[] dat) throws IllegalArgumentException, IOException, ItlException
     {
         /* Write the header */
         byte[] ba = version.getBytes("us-ascii");
-        
+
         assert ba.length < 256;
-        
+
         o.writeInt(Util.fromString("hdfm"));
-        
+
         int hl = 17 + headerRemainder.length + ba.length;
         o.writeInt(hl);
-        
+
         int fileLength = hl + dat.length;
         o.writeInt(fileLength);
-        
+
         o.writeInt(unknown);
-        
-        
+
+
         o.writeByte(ba.length);
         o.write(ba);
-        
+
         o.write(headerRemainder);
-        
+
         /* Encode and write the data */
         byte[] encrypted = crypt(dat, Cipher.ENCRYPT_MODE);
-        
+
         o.write(encrypted);
     }
 }

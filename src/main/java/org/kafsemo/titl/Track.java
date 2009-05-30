@@ -158,7 +158,7 @@ public class Track
     {
         this.name = n;
     }
-    
+
     public void setAlbum(String a)
     {
         this.album = a;
@@ -236,7 +236,7 @@ public class Track
     {
         return url;
     }
-    
+
     public void setUrl(String u)
     {
         this.url = u;
@@ -248,7 +248,7 @@ public class Track
     private String feedLink;
     private String localUrl;
     private String summary;
-    
+
     public void setPodcastUrl(String url)
     {
         podcastUrl = url;
@@ -258,7 +258,7 @@ public class Track
     {
         return itunesKeywords;
     }
-    
+
     public void setItunesKeywords(String kw)
     {
         this.itunesKeywords = kw;
@@ -268,7 +268,7 @@ public class Track
     {
         return subtitle;
     }
-    
+
     public void setItunesSubtitle(String st)
     {
         this.subtitle = st;
@@ -278,7 +278,7 @@ public class Track
 //    {
 //        return author;
 //    }
-//    
+//
 //    public void setAuthor(String a)
 //    {
 //        this.author = a;
@@ -288,7 +288,7 @@ public class Track
     {
         this.feedLink = subtitleOrFeedLink;
     }
-    
+
     public String getFeedLink()
     {
         return feedLink;
@@ -298,7 +298,7 @@ public class Track
     {
         return localUrl;
     }
-    
+
     public void setLocalUrl(String url)
     {
         this.localUrl = url;

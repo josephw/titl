@@ -29,15 +29,15 @@ class Playlist
 //    int id;
     public byte[] smartInfo;
     public byte[] smartCriteria;
-    
+
     private final List<Integer> items = new ArrayList<Integer>();
     private HohmPodcast hohmPodcast;;
-    
+
     public byte[] getPpid()
     {
         return ppid;
     }
-    
+
     public String getTitle()
     {
         return title;

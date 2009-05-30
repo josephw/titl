@@ -29,7 +29,7 @@ import org.kafsemo.titl.Track;
 
 /**
  * A simple command-line tool to export ratings as a comma-separated list.
- * 
+ *
  * @author Joseph
  */
 public class ExportRatings
@@ -40,9 +40,9 @@ public class ExportRatings
             System.err.println("Usage: ExportRatings <library.itl>");
             System.exit(5);
         }
-        
+
         Library lib = ParseLibrary.parse(new File(args[0]));
-        
+
         for (Track t : lib.getTracks()) {
             if(t.getLocation() != null) {
                 System.out.println(t.getLocation() + "," + t.getRating());

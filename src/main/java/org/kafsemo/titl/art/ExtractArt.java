@@ -41,7 +41,7 @@ import org.kafsemo.titl.Util;
 /**
  * A class to extract image data from an .itc2 file.
  * Minimal implementation using notes from <a href="http://www.falsecognate.org/2007/01/deciphering_the_itunes_itc_fil/">this article</a>.
- * 
+ *
  * @author Joseph
  */
 public class ExtractArt
@@ -49,14 +49,14 @@ public class ExtractArt
     public static void main(String[] args) throws FileNotFoundException, IOException
     {
         File f = new File("sample.itc2");
-        
+
         Collection<byte[]> streams = extract(f);
-        
+
 //        int i = 0;
-        
+
         for (byte[] ba : streams) {
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(ba));
-            
+
             JFrame jf = new JFrame();
             jf.getContentPane().add(new JButton(new ImageIcon(img)));
             jf.pack();
@@ -68,38 +68,38 @@ public class ExtractArt
 //            i++;
         }
     }
-    
+
     public static Collection<byte[]> extract(File f) throws IOException
     {
         Collection<byte[]> streams = new ArrayList<byte[]>();
-        
+
         int remaining = (int) f.length();
-        
+
         InputStream in = new FileInputStream(f);
         try {
             DataInput di = new DataInputStream(in);
             while (remaining > 0) {
                 int bl = di.readInt();
                 String type = Util.toString(di.readInt());
-    
+
                 if(type.equals("item")) {
                     int ltd = di.readInt();
                     di.skipBytes(ltd - 12);
-                    
+
                     byte[] ba = new byte[bl - ltd];
                     di.readFully(ba);
-    
+
                     streams.add(ba);
                 } else {
                     di.skipBytes(bl - 8);
                 }
-                
+
                 remaining -= bl;
             }
         } finally {
             in.close();
         }
-        
+
         return streams;
     }
 }
