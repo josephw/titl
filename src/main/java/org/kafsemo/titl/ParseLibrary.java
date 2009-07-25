@@ -382,6 +382,24 @@ public class ParseLibrary
                         consumed = recLength;
                         break;
 
+                    //  GLH:    TV Show-related 'hohm's
+                    //
+                    //          Description                                 .XML Key?
+                    case 0x18:  //  Show (on 'Video' tab)                   'Series'
+                    case 0x19:  //  Episode ID (on 'Video' tab)             'Episode'
+                    case 0x1a:  //  ?? Studio/Producer, e.g. "Fox"          --n/a--
+                    case 0x1c:  //  mpaa Rating                             'Content Rating'
+                    case 0x1d:  //  ?? DTD for Propertylist                 --n/a--
+                    case 0x23:  //  Sort-order for show title               'Sort Series'
+                    case 0x130: //  ??  Show/Series: I think it's used for 
+                                //      building the 'TV Shows' menu, since
+                                //      there's one entry for each 'Season'
+                                //      within a given show.
+                        String tvThing = readGenericHohm(di);
+//                        System.out.println(String.format("0x%04x", hohmType) + ": " + tvThing);
+                        consumed = recLength;
+                        break;
+
                     default:
                         throw new IOException("Unknown type: " + hohmType);
                 }
@@ -505,6 +523,9 @@ public class ParseLibrary
 
         case 1:
             return new String(data, "utf-16be");
+
+        case 2:
+            return new String(data, "utf-8");
 
         case 3:
             return new String(data, "windows-1252");
