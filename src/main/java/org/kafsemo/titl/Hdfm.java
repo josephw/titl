@@ -19,11 +19,19 @@
 package org.kafsemo.titl;
 import static org.kafsemo.titl.Util.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipException;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -34,13 +42,15 @@ public class Hdfm
     public final int unknown;
     final byte[] headerRemainder;
     public final byte[] fileData;
+    public Boolean compressContents;
 
-    private Hdfm(String version, int unknown, byte[] headerRemainder, byte[] fileData)
+    private Hdfm(String version, int unknown, byte[] headerRemainder, byte[] fileData, Boolean compressContents)
     {
         this.version = version;
         this.unknown = unknown;
         this.headerRemainder = headerRemainder;
         this.fileData = fileData;
+        this.compressContents = compressContents;
     }
 
 //    Byte   Length  Comment
@@ -93,8 +103,15 @@ public class Hdfm
 
         /* Decrypt */
         decrypted = crypt(restOfFile, Cipher.DECRYPT_MODE);
+        
+        /* Unzip (aka inflate, decompress...) */
+        byte[] inflated = inflate(decrypted);
+        
+        /* If inflate() returned the exact same array, that means the unzip failed, so we should assume
+           that the compression shouldn't be used for this ITL file. */
+        boolean useCompression = !Arrays.equals(decrypted, inflated);
 
-        return new Hdfm(version, unknown, headerRemainder, decrypted);
+        return new Hdfm(version, unknown, headerRemainder, inflated, useCompression);
     }
 
     /**
@@ -137,6 +154,71 @@ public class Hdfm
         return res;
     }
 
+    private static byte[] inflate(byte[] orig) throws ItlException
+    {
+    	byte[] inflated = null;
+
+    	try
+    	{
+	        InflaterInputStream isInflater = new InflaterInputStream(new ByteArrayInputStream(orig), new Inflater());
+	        ByteArrayOutputStream osDecompressed = new ByteArrayOutputStream(orig.length);
+	        inflated = new byte[orig.length];
+	        int iDecompressed;
+	        while(true)
+	        {
+	        	iDecompressed = isInflater.read(inflated, 0, orig.length);
+	            if (iDecompressed == -1)
+	                break;
+	            osDecompressed.write(inflated, 0, iDecompressed);
+	        }
+	        inflated = osDecompressed.toByteArray();
+	        osDecompressed.close();
+	        isInflater.close();
+    	}
+    	catch (ZipException ze)
+    	{
+    		// If a ZipException occurs, it's probably because "orig" isn't actually compressed data,
+    		// because it's from an earlier version of iTunes.
+    		// So since there's nothing to decompress, just return the array that was passed in, unchanged.
+    		return orig;
+    	}
+    	catch (IOException ioe)
+    	{
+    		throw new ItlException("Error when unzipping the file contents", ioe);
+    	}
+
+        return inflated;
+    }
+    
+    private static byte[] deflate(byte[] orig) throws ItlException
+    {
+    	try
+    	{
+    		DeflaterInputStream isDeflater = new DeflaterInputStream(new ByteArrayInputStream(orig), new Deflater());
+    		ByteArrayOutputStream osCompressed = new ByteArrayOutputStream(orig.length);
+    		byte[] deflated = new byte[orig.length];
+    		int iCompressed;
+
+    		while(true)
+    		{
+    			iCompressed = isDeflater.read(deflated, 0, orig.length);
+    		    if (iCompressed == -1)
+    		        break;
+    		    osCompressed.write(deflated, 0, iCompressed);
+    		}
+    		
+    		deflated = osCompressed.toByteArray();
+    		osCompressed.close();
+    		isDeflater.close();
+
+    		return deflated;
+    	}
+    	catch (IOException ioe)
+    	{
+    		throw new ItlException("Error when zipping the file contents", ioe);
+    	}
+    }
+
     public void write(DataOutput o) throws IllegalArgumentException, IOException, ItlException
     {
         write(o, fileData);
@@ -144,6 +226,12 @@ public class Hdfm
 
     public void write(DataOutput o, byte[] dat) throws IllegalArgumentException, IOException, ItlException
     {
+    	if (this.compressContents)
+    	{
+    		/* If the contents were zipped before, we should zip them now, before encrypting and then writing to the file */
+    		dat = deflate(dat);
+    	}
+
         /* Write the header */
         byte[] ba = version.getBytes("us-ascii");
 
