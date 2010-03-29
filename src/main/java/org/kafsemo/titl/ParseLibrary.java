@@ -373,6 +373,7 @@ public class ParseLibrary
 
                     /* Unknown, but seen */
                     case 0x69:
+                    case 0x6b:
                     case 0x1f7:
                     case 0x1f4:
 //                        int words = (recLength - consumed) / 4;

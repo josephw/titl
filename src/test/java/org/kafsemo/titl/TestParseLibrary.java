@@ -442,4 +442,21 @@ public class TestParseLibrary extends TestCase
         
         assertEquals("http://www.tmbg.com/_media/_pod/podcast.xml", podcastTrack.getLocalUrl());
     }
+
+    /**
+     * Libraries in this release are compressed. This test confirms that decompression
+     * works.
+     * 
+     * @throws IOException
+     * @throws ItlException
+     */
+    public void testParseEmptyItunes9Library() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty iTunes 9.0.3 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("9.0.3", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+    }
 }
