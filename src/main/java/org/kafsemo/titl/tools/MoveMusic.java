@@ -1,6 +1,6 @@
 /*
  *  titl - Tools for iTunes Libraries
- *  Copyright (C) 2008 Joseph Walton
+ *  Copyright (C) 2008, 2010 Joseph Walton
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,30 +27,83 @@ import org.kafsemo.titl.ItlException;
 import org.kafsemo.titl.ProcessLibrary;
 
 /**
- * A command-line tool to process a music library and move all music files from one directory
+ * <p>A command-line tool to process a music library and move all music files from one directory
  * to another. If you move the files on disk at the same time, processing with this tool
- * will make the app pick them up from the new location.
+ * will make the app pick them up from the new location.</p>
+ * 
+ * <p>The <code>--use-urls</code> switch will convert the URL rather than
+ * the filename of each track. On Windows, the default (filename) works.</p>
  *
  * @author Joseph
  */
 public class MoveMusic implements ProcessLibrary.StringConverter
 {
     private final String origDir, destDir;
+    private boolean useUrls;
 
     public MoveMusic(String string, String string2)
     {
         origDir = string;
         destDir = string2;
+        useUrls = false;
     }
 
+    public static MoveMusic fromArgs(String[] args)
+    {
+        if (args.length < 2) {
+            return null;
+        }
+        
+        boolean useUrls = false;
+        int firstPath;
+        
+        if (args[0].startsWith("--")) {
+            firstPath = 1;
+            if (args[0].equals("--use-urls")) {
+                useUrls = true;
+            } else {
+                return null;
+            }
+        } else {
+            firstPath = 0;
+        }
+        
+        if (args.length - firstPath != 2) {
+            return null;
+        }
+        
+        MoveMusic mm = new MoveMusic(args[firstPath], args[firstPath + 1]);
+        mm.setUseUrls(useUrls);
+        return mm;
+    }
+    
+    String getOrigDir()
+    {
+        return origDir;
+    }
+    
+    String getDestDir()
+    {
+        return destDir;
+    }
+    
+    boolean isUseUrls()
+    {
+        return useUrls;
+    }
+    
+    void setUseUrls(boolean u)
+    {
+        useUrls = u;
+    }
+    
     public static void main(String[] args) throws IOException, ItlException
     {
-        if (args.length != 3) {
-            System.err.println("Usage: MoveMusic <iTunes Library.itl> <source directory> <destination directory>");
+        MoveMusic mm = fromArgs(args);
+        if (mm == null) {
+            System.err.println("Usage: MoveMusic [--use-urls] <iTunes Library.itl> <source directory> <destination directory>");
             System.exit(5);
         }
-
-        MoveMusic mm = new MoveMusic(args[1], args[2]);
 
         /* Warn if the paths are specified differently */
         if (hasSlash(mm.origDir) != hasSlash(mm.destDir)) {
@@ -58,7 +111,11 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         }
 
         ProcessLibrary pl = new ProcessLibrary();
-        pl.register(0x0d, mm);
+        if (mm.isUseUrls()) {
+            pl.register(0x0B, mm);
+        } else {
+            pl.register(0x0D, mm);
+        }
 
         File f = new File(args[0]);
 
