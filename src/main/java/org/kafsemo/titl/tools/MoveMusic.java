@@ -46,7 +46,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
     public static void main(String[] args) throws IOException, ItlException
     {
         if (args.length != 3) {
-            System.err.println("Usage: MoveMusic <iTunes library.itl> <source directory> <destination directory>");
+            System.err.println("Usage: MoveMusic <iTunes Library.itl> <source directory> <destination directory>");
             System.exit(5);
         }
 

@@ -459,4 +459,20 @@ public class TestParseLibrary extends TestCase
         assertEquals("9.0.3", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
+
+    /**
+     * Another test for a new release.
+     * 
+     * @throws IOException
+     * @throws ItlException
+     */
+    public void testParseEmptyItunes9_2Library() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty iTunes 9.2.0 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("9.2", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+    }
 }
