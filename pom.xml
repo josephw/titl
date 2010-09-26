@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kafsemo</groupId>
-  <artifactId>itunes</artifactId>
+  <artifactId>titl</artifactId>
   <packaging>jar</packaging>
 
-  <version>1.0-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -17,19 +17,7 @@
 
   <properties>
    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   <maven.compiler.source>1.6</maven.compiler.source>
+   <maven.compiler.target>1.6</maven.compiler.target>
   </properties>
-
-  <build>
-    <plugins>
-      <!-- Force Java 1.6 -->
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
