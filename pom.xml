@@ -20,4 +20,12 @@
    <maven.compiler.source>1.6</maven.compiler.source>
    <maven.compiler.target>1.6</maven.compiler.target>
   </properties>
+
+  <licenses>
+   <license>
+    <name>GPLv3</name>
+    <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+    <distribution>repo</distribution>
+   </license>
+  </licenses>
 </project>
