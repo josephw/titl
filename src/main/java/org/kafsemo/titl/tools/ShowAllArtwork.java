@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -41,6 +42,8 @@ import org.kafsemo.titl.art.ExtractArt;
  */
 public class ShowAllArtwork
 {
+    private static final Logger log = Logger.getLogger(ShowAllArtwork.class.getName());
+
     public static void main(String[] args) throws IOException
     {
         if (args.length != 1) {
@@ -70,11 +73,16 @@ public class ShowAllArtwork
             for (byte[] ba : streams) {
                 BufferedImage img = ImageIO.read(new ByteArrayInputStream(ba));
 
+                if(img == null) {
+                    log.warning("Unable to load file: " + f);
+                    continue;
+                }
+                
                 Dimension d = jp.getSize();
 
                 int x, y;
 
-                if (img.getWidth() <= d.width && img.getHeight() <= d.height) {
+                if (img.getWidth() < d.width && img.getHeight() < d.height) {
                     x = r.nextInt(d.width - img.getWidth());
                     y = r.nextInt(d.height - img.getHeight());
                 } else {
