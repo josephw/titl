@@ -1,6 +1,6 @@
 /*
  *  titl - Tools for iTunes Libraries
- *  Copyright (C) 2008 Joseph Walton
+ *  Copyright (C) 2008, 2010 Joseph Walton
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,16 +28,12 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 
 /**
  * Development class to parse a library file. Fails as quickly as possibly
@@ -99,7 +95,15 @@ public class ParseLibrary
         long fileLength = f.length();
 
         InputStream in = new FileInputStream(f);
-
+        try {
+            return parse(in, fileLength);
+        } finally {
+            in.close();
+        }
+    }
+    
+    public static Library parse(InputStream in, long fileLength) throws IOException, ItlException
+    {
         DataInputStream di = new DataInputStream(in);
 
         Hdfm hdr = Hdfm.read(di, fileLength);
@@ -402,7 +406,9 @@ public class ParseLibrary
                         break;
 
                     default:
-                        throw new IOException("Unknown type: " + hohmType);
+                        byte[] unknownHohmContents = new byte[recLength - consumed];
+                        di.readFully(unknownHohmContents);
+                        throw new UnknownHohmException(hohmType, unknownHohmContents);
                 }
             }
             else if(type.equals("hdsm"))
