@@ -42,6 +42,7 @@ public class UnknownHohmException extends ItlException
         StringBuilder sb = new StringBuilder();
         sb.append("Unknown type: ");
         sb.append(hohmType);
+        sb.append(String.format(" (0x%X)", hohmType));
  
         int len = Math.min(contents.length, 64);
 
@@ -50,19 +51,19 @@ public class UnknownHohmException extends ItlException
         sb.append("Hex:");
         for(int i = 0; i < len; i++) {
             sb.append(' ');
-            sb.append(String.format("0x%02x", contents[i] & 0xFF));
+            sb.append(String.format("0x%02X", contents[i] & 0xFF));
         }
         
         if (len < contents.length) {
             sb.append(" ...");
         }
         
+        len = Math.min(contents.length, 96);
+        
         /* ASCII */
         sb.append('\n');
-        sb.append("ASCII:");
+        sb.append("ASCII: ");
         for (int i = 0; i < len; i++) {
-            sb.append(' ');
-            
             /* Only show printable ASCII characters */
             int c = contents[i] & 0xFF;
             if ((c >= 0x20) && (c <= 0x7E)) {

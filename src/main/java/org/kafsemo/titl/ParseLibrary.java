@@ -326,9 +326,17 @@ public class ParseLibrary
                     case 0x20:
                     case 0x21:
                     case 0x22:
+                    case 0x2D: // A version string?
+                    case 0x2E: // Copyright notice?
+                    case 0x2F:
                     case 0xc8: // Podcast episode list title
+                    case 0xC9: // Podcast title
                     case 0x12D:
                     case 0x12E:
+                    case 0x132: // App title
+                    case 0x1F8: // A UUID. For?
+                    case 0x1F9: // A UUID. For?
+                    case 0x1FA: // An email address. For?
                     case 0x191:
                         String val = readGenericHohm(di);
 //                        System.out.println(val);
@@ -376,6 +384,7 @@ public class ParseLibrary
                         break;
 
                     /* Unknown, but seen */
+                    case 0x68:
                     case 0x69:
                     case 0x6b:
                     case 0x1f7:
