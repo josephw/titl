@@ -115,6 +115,48 @@ public class Hdfm
     }
 
     /**
+     * hdfm chunks occur inline in 10.0, for some reason.
+     * 
+     * @param di
+     * @param length
+     * @param consumed
+     * @return
+     * @throws IOException
+     * @throws ItlException
+     */
+    public static Hdfm readInline(DataInput di, int length, int consumed) throws IOException, ItlException
+    {
+        int hl = di.readInt();
+
+        if (hl != 0) {
+            throw new IOException("Expected zero for inline HDFM length (was " + hl + ")");
+        }
+        
+        int fl = di.readInt();
+
+        int unknown = di.readInt();
+
+        int vsl = di.readUnsignedByte();
+        byte[] avs = new byte[vsl];
+        di.readFully(avs);
+
+        String version = new String(avs, "us-ascii");
+
+        consumed += vsl + 13;
+
+        byte[] headerRemainder = new byte[length - consumed];
+        di.readFully(headerRemainder);
+
+        consumed += headerRemainder.length;
+
+        if (consumed != length) {
+            throw new IOException("Expected to read " + length + " bytes but read " + consumed);
+        }
+        
+        return new Hdfm(version, unknown, headerRemainder, null, false);
+    }
+    
+    /**
      * Obfuscation description from
      * <a href="http://search.cpan.org/src/BDFOY/Mac-iTunes-0.90/examples/crypt-rijndael.pl">this sample</a>.
      *

@@ -446,6 +446,10 @@ public class ParseLibrary
                 readHaim(di, length - consumed);
                 consumed = length;
             }
+            else if (type.equals("hdfm")) {
+                Hdfm.readInline(di, length, consumed);
+                consumed = length;
+            }
             else if (type.equals("hghm") || type.equals("halm") || type.equals("hilm") || type.equals("htlm") || type.equals("hplm")
                     || type.equals("hiim"))
             {
