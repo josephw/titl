@@ -19,6 +19,8 @@
 package org.kafsemo.titl;
 
 import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 
@@ -40,6 +42,17 @@ public class TestUtil
         String s = "hdfm";
         
         assertEquals(1751410285, Util.fromString(s));
+    }
+    
+    @Test
+    public void isPlausibleIdentifier() throws UnsupportedEncodingException
+    {
+        assertTrue("Letters form a valid identifier", Util.isIdentifier("test"));
+        assertTrue("Letters form a valid identifier", Util.isIdentifier("0123"));
+        assertFalse("Non-alphanumeric characters are not a valid identifer",
+                Util.isIdentifier("xÄ½"));
+        
+        assertFalse("The empty string is not a valid identifier", Util.isIdentifier(""));
     }
     
     @Test

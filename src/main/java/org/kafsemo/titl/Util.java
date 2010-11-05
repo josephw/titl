@@ -20,6 +20,7 @@ package org.kafsemo.titl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 
 public class Util
@@ -88,5 +89,12 @@ public class Util
         } catch (URISyntaxException use) {
             throw new RuntimeException(use);
         }
+    }
+
+    private static Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
+    
+    public static boolean isIdentifier(String id)
+    {
+        return ID_PATTERN.matcher(id).matches();
     }
 }

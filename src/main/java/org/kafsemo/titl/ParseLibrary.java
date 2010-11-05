@@ -460,7 +460,13 @@ public class ParseLibrary
             {
 //                hexDumpBytes(di, length - consumed);
 //                consumed = length;
-                throw new ItlException("Unhandled type: " + type);
+
+                if (Util.isIdentifier(type)) {
+                    throw new ItlException("Unhandled type: " + type);
+                } else {
+                    throw new ItlException("Library format not understood; bad decryption (unhandled type: "
+                            + type + ")");
+                }
             }
 
             remaining -= consumed;
