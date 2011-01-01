@@ -18,15 +18,21 @@
 
 package org.kafsemo.titl;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.ZipException;
 
 import org.junit.Test;
-import org.kafsemo.titl.Hdfm;
 
 public class TestHdfm
 {
@@ -128,5 +134,50 @@ public class TestHdfm
         assertNotNull(hdfm);
         assertEquals("8.0", hdfm.version);
         assertEquals(wholeFile.length - hdfm8Header.length, hdfm.fileData.length);
+    }
+    
+    @Test
+    public void uncompressedDataIsNotInflated() throws Exception
+    {
+        byte[] data = "Uncompressed.".getBytes("us-ascii");
+     
+        assertEquals("The same array is returned when data is not compressed",
+                data, Hdfm.inflate(data));
+    }
+    
+    @Test
+    public void compressedDataIsInflated() throws Exception
+    {
+        byte[] data = "Uncompressed.".getBytes("us-ascii");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStream out = new DeflaterOutputStream(baos);
+        out.write(data);
+        out.close();
+
+        byte[] compressed = baos.toByteArray();
+
+        assertFalse(Arrays.equals(data, compressed));
+        
+        byte[] after = Hdfm.inflate(compressed);
+        
+        assertArrayEquals("Data is decompressed", data, after);
+    }
+    
+    @Test(expected = ZipException.class)
+    public void probablyCompressedFileThrowsExceptionIfErrorDuringDecompression() throws Exception
+    {
+        byte[] data = "Uncompressed.".getBytes("us-ascii");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStream out = new DeflaterOutputStream(baos);
+        out.write(data);
+        out.close();
+
+        byte[] compressed = baos.toByteArray();
+
+        /* Intentionally corrupt the compressed data */
+        compressed[compressed.length - 1] ^= 0xFF;
+        Hdfm.inflate(compressed);
     }
 }

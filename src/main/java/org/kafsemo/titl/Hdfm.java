@@ -196,8 +196,11 @@ public class Hdfm
         return res;
     }
 
-    private static byte[] inflate(byte[] orig) throws ItlException
+    static byte[] inflate(byte[] orig) throws ItlException, ZipException
     {
+        /* Check for a zlib flag byte; 0x78 => 32k window, deflate */
+        boolean probablyCompressed = (orig.length >= 1 && orig[0] == 0x78);
+        
     	byte[] inflated = null;
 
     	try
@@ -219,6 +222,10 @@ public class Hdfm
     	}
     	catch (ZipException ze)
     	{
+            if (probablyCompressed)
+            {
+                throw ze;
+            }
     		// If a ZipException occurs, it's probably because "orig" isn't actually compressed data,
     		// because it's from an earlier version of iTunes.
     		// So since there's nothing to decompress, just return the array that was passed in, unchanged.
