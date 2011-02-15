@@ -392,15 +392,20 @@ public class ParseLibrary
 //                        System.exit(0);
                         di.readFully(pcInf);
 //                        System.out.println(pcInf.length);
-                        currentPlaylist.setHohmPodcast(HohmPodcast.parse(
-                                new DataInputStream(new ByteArrayInputStream(pcInf)),
-                                pcInf.length));
+                        try {
+                            currentPlaylist.setHohmPodcast(HohmPodcast.parse(
+                                    new DataInputStream(new ByteArrayInputStream(pcInf)),
+                                    pcInf.length));
+                        } catch (IOException ioe) {
+                            // XXX Failed to parse podcast
+                        }
                         consumed = recLength;
                         break;
 
                     /* Unknown, but seen */
                     case 0x68:
                     case 0x69:
+                    case 0x6A: // A list of bands?
                     case 0x6b:
                     case 0x1f7:
                     case 0x1f4:
