@@ -1,6 +1,6 @@
 /*
  *  titl - Tools for iTunes Libraries
- *  Copyright (C) 2008, 2010 Joseph Walton
+ *  Copyright (C) 2008-2011 Joseph Walton
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -314,6 +314,11 @@ public class ParseLibrary
                         consumed = recLength;
                         break;
 
+                    case 0x2B: // ISRC. Could also be a more generic recording ID?
+                        String id = readGenericHohm(di);
+                        consumed = recLength;
+                        break;
+                        
                     case 0x09: // iTunes category?
 
                     case 0x08:
