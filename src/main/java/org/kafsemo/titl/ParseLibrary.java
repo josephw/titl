@@ -318,6 +318,16 @@ public class ParseLibrary
                         String id = readGenericHohm(di);
                         consumed = recLength;
                         break;
+
+                    case 0x30: // Data for apps
+                    case 0x32: // DRM key files? for apps
+                        expectZeroBytes(di, 8);
+                        consumed += 8;
+                        byte[] xmlBa = new byte[recLength - consumed];
+                        di.readFully(xmlBa);
+                        String plist = new String(xmlBa);
+                        consumed = recLength;
+                        break;
                         
                     case 0x09: // iTunes category?
 
