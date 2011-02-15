@@ -1,6 +1,6 @@
 /*
  *  titl - Tools for iTunes Libraries
- *  Copyright (C) 2008 Joseph Walton
+ *  Copyright (C) 2008-2011 Joseph Walton
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ public class Hdfm
         byte[] decrypted = new byte[restOfFile.length];
 
         /* Decrypt */
-        decrypted = crypt(restOfFile, Cipher.DECRYPT_MODE);
+        decrypted = crypt(version, restOfFile, Cipher.DECRYPT_MODE);
         
         /* Unzip (aka inflate, decompress...) */
         byte[] inflated = inflate(decrypted);
@@ -166,7 +166,7 @@ public class Hdfm
      * @throws UnsupportedEncodingException
      * @throws ItlException
      */
-    private static byte[] crypt(byte[] orig, int mode) throws UnsupportedEncodingException, ItlException
+    private static byte[] crypt(String version, byte[] orig, int mode) throws UnsupportedEncodingException, ItlException
     {
         byte[] res = new byte[orig.length];
 
@@ -178,9 +178,17 @@ public class Hdfm
             Cipher cip = Cipher.getInstance("AES/ECB/NoPadding");
             cip.init(mode, skeySpec);
 
-            int x = orig.length % 16;
+            int encryptedLength = orig.length;
 
-            byte[] result = cip.doFinal(orig, 0, orig.length - x);
+            if (ITunesVersion.isAtLeast(version, 10)) {
+                encryptedLength = Math.min(encryptedLength, 102400);
+            }
+
+            encryptedLength -= encryptedLength % 16;
+            
+            int x = orig.length - encryptedLength;
+            
+            byte[] result = cip.doFinal(orig, 0, encryptedLength);
             System.arraycopy(result, 0, res, 0, result.length);
             System.arraycopy(orig, result.length, res, result.length, x);
         } catch (GeneralSecurityException gse) {
@@ -303,7 +311,7 @@ public class Hdfm
         o.write(headerRemainder);
 
         /* Encode and write the data */
-        byte[] encrypted = crypt(dat, Cipher.ENCRYPT_MODE);
+        byte[] encrypted = crypt(version, dat, Cipher.ENCRYPT_MODE);
 
         o.write(encrypted);
     }
