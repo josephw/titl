@@ -3,17 +3,24 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kafsemo</groupId>
   <artifactId>titl</artifactId>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
-  <version>0.2-SNAPSHOT</version>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <version>0.3-SNAPSHOT</version>
+
+  <modules>
+    <module>titl-core</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.8.1</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <properties>
    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
