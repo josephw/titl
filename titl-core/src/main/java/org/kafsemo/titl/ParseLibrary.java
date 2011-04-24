@@ -20,9 +20,6 @@ package org.kafsemo.titl;
 
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,8 +33,6 @@ import java.util.Collection;
 /**
  * Development class to parse a library file. Fails as quickly as possibly
  * on unknown structure. Saves the unobfuscated contents in a new file.
- *
- * @author Joseph
  */
 public class ParseLibrary
 {
@@ -499,14 +494,6 @@ public class ParseLibrary
         return footer;
     }
 
-    static void hexDump(Input di, int count) throws IOException
-    {
-        for (int i = 0; i < count; i++) {
-            int v = di.readInt();
-//            System.out.printf("%3d 0x%08x %4s\n", i, v, Util.toString(v));
-        }
-    }
-
     static void hexDumpBytes(Input di, int count) throws IOException
     {
         for (int i = 0; i < count; i++) {
@@ -528,31 +515,13 @@ public class ParseLibrary
         di.readFully(unknown);
 
         int dataLength = di.readInt();
-        byte[] alsoUnknown = new byte[8];
-        di.readFully(alsoUnknown);
-        for (byte b : alsoUnknown) {
-            if (b != 0) {
-                throw new ItlException("Expected zeroes in HOHM block");
-            }
-        }
+        expectZeroBytes(di, 8, " in HOHM block");
 
         byte[] data = new byte[dataLength];
         di.readFully(data);
 
-//        Writer w = new FileWriter("encoding-log.txt", true);
-//        String log = Arrays.toString(unknown) + " - " + dataLength + /*" - " + Arrays.toString(alsoUnknown) + */" - " + guessEncoding(data);
-//        try {
-//            w.write(log + "\n");
-//        } finally {
-//            w.close();
-//        }
-
-//        String s;
-
         return toString(data, unknown[11]);
     }
-
-    static int fail = 0;
 
     public static String toString(byte[] data) throws UnsupportedEncodingException
     {
@@ -826,63 +795,12 @@ public class ParseLibrary
 //        di.skipBytes(length);
     }
 
-    private static void arrayDumpBytes(String type, int length, int recLength, int hohmType,
-            Input di, int remaining) throws IOException
-    {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput out = new DataOutputStream(baos);
-        out.writeInt(Util.fromString(type));
-        out.writeInt(length);
-        out.writeInt(recLength);
-        out.writeInt(hohmType);
-
-        byte[] misc = new byte[remaining];
-        di.readFully(misc);
-        out.write(misc);
-
-        byte[] ba = baos.toByteArray();
-
-        for (int i = 0; i < ba.length; i++) {
-            if (i > 0)
-            {
-                System.out.print(",");
-            }
-            if (i % 4 == 0) {
-                System.out.println();
-            } else {
-                System.out.print(" ");
-            }
-
-            System.out.printf("0x%02x", ba[i]);
-        }
-    }
-
-    private static void arrayDumpBytes(Input di, int remaining) throws IOException
-    {
-        byte[] ba = new byte[remaining];
-        di.readFully(ba);
-        
-        for (int i = 0; i < ba.length; i++) {
-            if (i > 0)
-            {
-                System.out.print(",");
-            }
-            if (i % 8 == 0) {
-                System.out.println();
-            } else {
-                System.out.print(" ");
-            }
-
-            byte b = ba[i];
-            if (b < 0) {
-                System.out.printf("(byte) 0x%02x", b);
-            } else {
-                System.out.printf("0x%02x", b);
-            }
-        }
-    }
-
     static void expectZeroBytes(Input di, int count) throws IOException, ItlException
+    {
+        expectZeroBytes(di, count, "");
+    }
+    
+    static void expectZeroBytes(Input di, int count, String where) throws IOException, ItlException
     {
         byte[] ba = new byte[count];
         di.readFully(ba);
@@ -890,7 +808,8 @@ public class ParseLibrary
         for (int i = 0; i < ba.length; i++) {
             byte b = ba[i];
             if (b != 0x00) {
-                throw new ItlException("Expected zero byte. Was: " + b);
+                throw new ItlException("Expected " + count + " zero bytes" + where
+                        + ". Was: 0x" + Integer.toHexString(b) + " at offset " + i);
             }
         }
     }

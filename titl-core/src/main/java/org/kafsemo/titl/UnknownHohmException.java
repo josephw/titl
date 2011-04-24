@@ -21,8 +21,6 @@ package org.kafsemo.titl;
 /**
  * An unknown hohm type was encountered. This exception includes
  * the contents to give a clue to the data.
- * 
- * @author joe
  */
 public class UnknownHohmException extends ItlException
 {
