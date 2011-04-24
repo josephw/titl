@@ -21,8 +21,6 @@ package org.kafsemo.titl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -104,7 +102,7 @@ public class ParseLibrary
     
     public static Library parse(InputStream in, long fileLength) throws IOException, ItlException
     {
-        DataInputStream di = new DataInputStream(in);
+        Input di = new InputImpl(in);
 
         Hdfm hdr = Hdfm.read(di, fileLength);
 
@@ -112,13 +110,13 @@ public class ParseLibrary
 
         ParseLibrary pl = new ParseLibrary();
 
-        String path = pl.drain(new DataInputStream(new ByteArrayInputStream(hdr.fileData)), hdr.fileData.length);
+        String path = pl.drain(new InputImpl(new ByteArrayInputStream(hdr.fileData)), hdr.fileData.length);
 
         Library library = new Library(hdr, path, pl.playlists, pl.podcasts, pl.tracks);
         return library;
     }
 
-    private String drain(DataInput di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException
+    String drain(Input di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException
     {
         int remaining = totalLength;
 
@@ -394,7 +392,7 @@ public class ParseLibrary
 //                        System.out.println(pcInf.length);
                         try {
                             currentPlaylist.setHohmPodcast(HohmPodcast.parse(
-                                    new DataInputStream(new ByteArrayInputStream(pcInf)),
+                                    new InputImpl(new ByteArrayInputStream(pcInf)),
                                     pcInf.length));
                         } catch (IOException ioe) {
                             // XXX Failed to parse podcast
@@ -501,7 +499,7 @@ public class ParseLibrary
         return footer;
     }
 
-    static void hexDump(DataInput di, int count) throws IOException
+    static void hexDump(Input di, int count) throws IOException
     {
         for (int i = 0; i < count; i++) {
             int v = di.readInt();
@@ -509,7 +507,7 @@ public class ParseLibrary
         }
     }
 
-    static void hexDumpBytes(DataInput di, int count) throws IOException
+    static void hexDumpBytes(Input di, int count) throws IOException
     {
         for (int i = 0; i < count; i++) {
             int v = di.readUnsignedByte();
@@ -524,7 +522,7 @@ public class ParseLibrary
 //     16       8      ?
 //     24       N      data
 
-    static String readGenericHohm(DataInput di) throws IOException, ItlException
+    static String readGenericHohm(Input di) throws IOException, ItlException
     {
         byte[] unknown = new byte[12];
         di.readFully(unknown);
@@ -600,7 +598,7 @@ public class ParseLibrary
 //      8       4     ?
 //     12       4     block type ?
 //     16      L-16   ?
-    static boolean readHdsm(DataInput di, int length) throws IOException
+    static boolean readHdsm(Input di, int length) throws IOException
     {
         // Assume header and length already read
 
@@ -620,7 +618,7 @@ public class ParseLibrary
 //      8       4      ?
 //     12       4      ?
 //     16       4      number of items (hptm) in playlist
-    private void readHpim(DataInput di, int length) throws IOException, ItlException
+    private void readHpim(Input di, int length) throws IOException, ItlException
     {
         int unknownA = di.readInt();
         int unknownB = di.readInt();
@@ -641,7 +639,7 @@ public class ParseLibrary
         playlists.add(currentPlaylist);
     }
 
-    private void readHptm(DataInput di, int length) throws IOException, ItlException
+    private void readHptm(Input di, int length) throws IOException, ItlException
     {
         byte[] unknown = new byte[16];
         di.readFully(unknown);
@@ -695,7 +693,7 @@ public class ParseLibrary
 //    109      11     ?
 //    120       4     add date
 //    124      32     ?
-    public int readHtim(DataInput di, int length) throws IOException
+    public int readHtim(Input di, int length) throws IOException
     {
 //        8       4     R = total record length, including sub-blocks
 //         12       4     N = number of hohm sub-blocks
@@ -816,7 +814,7 @@ public class ParseLibrary
     }
 
     /* A Podcast header? */
-    void readHaim(DataInput di, int length) throws ItlException, IOException
+    void readHaim(Input di, int length) throws ItlException, IOException
     {
         Podcast p = new Podcast();
         podcasts.add(p);
@@ -828,8 +826,8 @@ public class ParseLibrary
 //        di.skipBytes(length);
     }
 
-    static void arrayDumpBytes(String type, int length, int recLength, int hohmType,
-            DataInput di, int remaining) throws IOException
+    private static void arrayDumpBytes(String type, int length, int recLength, int hohmType,
+            Input di, int remaining) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutput out = new DataOutputStream(baos);
@@ -838,9 +836,9 @@ public class ParseLibrary
         out.writeInt(recLength);
         out.writeInt(hohmType);
 
-        for (int i = 0; i < remaining; i++) {
-            out.writeByte(di.readByte());
-        }
+        byte[] misc = new byte[remaining];
+        di.readFully(misc);
+        out.write(misc);
 
         byte[] ba = baos.toByteArray();
 
@@ -859,9 +857,12 @@ public class ParseLibrary
         }
     }
 
-    static void arrayDumpBytes(DataInput di, int remaining) throws IOException
+    private static void arrayDumpBytes(Input di, int remaining) throws IOException
     {
-        for (int i = 0; i < remaining; i++) {
+        byte[] ba = new byte[remaining];
+        di.readFully(ba);
+        
+        for (int i = 0; i < ba.length; i++) {
             if (i > 0)
             {
                 System.out.print(",");
@@ -872,7 +873,7 @@ public class ParseLibrary
                 System.out.print(" ");
             }
 
-            byte b = di.readByte();
+            byte b = ba[i];
             if (b < 0) {
                 System.out.printf("(byte) 0x%02x", b);
             } else {
@@ -881,10 +882,13 @@ public class ParseLibrary
         }
     }
 
-    static void expectZeroBytes(DataInput di, int count) throws IOException, ItlException
+    static void expectZeroBytes(Input di, int count) throws IOException, ItlException
     {
-        for (int i = 0; i < count; i++) {
-            byte b = di.readByte();
+        byte[] ba = new byte[count];
+        di.readFully(ba);
+        
+        for (int i = 0; i < ba.length; i++) {
+            byte b = ba[i];
             if (b != 0x00) {
                 throw new ItlException("Expected zero byte. Was: " + b);
             }

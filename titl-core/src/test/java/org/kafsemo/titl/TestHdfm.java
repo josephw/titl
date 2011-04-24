@@ -25,8 +25,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.zip.DeflaterOutputStream;
@@ -114,7 +112,7 @@ public class TestHdfm
         byte[] wholeFile = new byte[6841724];
         System.arraycopy(hdfm6Header, 0, wholeFile, 0, hdfm6Header.length);
         
-        DataInput di = new DataInputStream(new ByteArrayInputStream(wholeFile));
+        Input di = new InputImpl(new ByteArrayInputStream(wholeFile));
         
         Hdfm hdfm = Hdfm.read(di, wholeFile.length);
         assertNotNull(hdfm);
@@ -128,7 +126,7 @@ public class TestHdfm
         byte[] wholeFile = new byte[60699];
         System.arraycopy(hdfm8Header, 0, wholeFile, 0, hdfm8Header.length);
         
-        DataInput di = new DataInputStream(new ByteArrayInputStream(wholeFile));
+        Input di = new InputImpl(new ByteArrayInputStream(wholeFile));
         
         Hdfm hdfm = Hdfm.read(di, wholeFile.length);
         assertNotNull(hdfm);

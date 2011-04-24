@@ -48,7 +48,7 @@ public class ProcessLibrary
 
         InputStream inStr = new FileInputStream(inFile);
         try {
-            DataInput di = new DataInputStream(inStr);
+            Input di = new InputImpl(inStr);
             hdfm = Hdfm.read(di, inFile.length());
         } finally {
             inStr.close();
@@ -113,7 +113,7 @@ public class ProcessLibrary
 
                 /* Did we hit the end? */
                 if(type.equals("hdsm")) {
-                    going = !ParseLibrary.readHdsm(new DataInputStream(new ByteArrayInputStream(ba)), ba.length);
+                    going = !ParseLibrary.readHdsm(new InputImpl(new ByteArrayInputStream(ba)), ba.length);
                 }
 
                 remaining -= length;

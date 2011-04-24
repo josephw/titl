@@ -21,14 +21,9 @@ package org.kafsemo.titl;
 import static junit.framework.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.kafsemo.titl.ItlException;
-import org.kafsemo.titl.ParseLibrary;
-import org.kafsemo.titl.Util;
 
 public class TestHohm
 {
@@ -69,7 +64,7 @@ public class TestHohm
     @Test
     public void testHohmUtf16PlaylistTitle() throws IOException, ItlException
     {
-        DataInput di = new DataInputStream(new ByteArrayInputStream(sampleUtf16Chunk));
+        Input di = new InputImpl(new ByteArrayInputStream(sampleUtf16Chunk));
         
         String type = Util.toString(di.readInt());
         assertEquals("hohm", type);
@@ -88,7 +83,7 @@ public class TestHohm
     @Test
     public void testHohmLatin1PlaylistTitle() throws IOException, ItlException
     {
-        DataInput di = new DataInputStream(new ByteArrayInputStream(sampleLatin1Chunk));
+        Input di = new InputImpl(new ByteArrayInputStream(sampleLatin1Chunk));
         
         String type = Util.toString(di.readInt());
         assertEquals("hohm", type);

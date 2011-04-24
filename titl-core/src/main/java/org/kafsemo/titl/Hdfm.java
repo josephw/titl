@@ -21,7 +21,6 @@ import static org.kafsemo.titl.Util.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -62,7 +61,7 @@ public class Hdfm
 //     13       1     N = length of version string
 //     14       N     application version string
 //     14+N   L-N-17  ?
-    public static Hdfm read(DataInput di, long fileLength) throws IOException, ItlException
+    public static Hdfm read(Input di, long fileLength) throws IOException, ItlException
     {
         int hdr = di.readInt();
         assertEquals("hdfm", Util.toString(hdr));
@@ -124,7 +123,7 @@ public class Hdfm
      * @throws IOException
      * @throws ItlException
      */
-    public static Hdfm readInline(DataInput di, int length, int consumed) throws IOException, ItlException
+    public static Hdfm readInline(Input di, int length, int consumed) throws IOException, ItlException
     {
         int hl = di.readInt();
 

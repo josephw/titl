@@ -22,12 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.kafsemo.titl.HohmPodcast;
 
 public class TestHohmPodcast
 {
@@ -450,7 +448,7 @@ public class TestHohmPodcast
     public void parseEmptySample() throws IOException
     {
         HohmPodcast hp = HohmPodcast.parse(
-                new DataInputStream(new ByteArrayInputStream(emptySample)), emptySample.length);
+                new InputImpl(new ByteArrayInputStream(emptySample)), emptySample.length);
         
         assertNull(hp);
     }
@@ -459,7 +457,7 @@ public class TestHohmPodcast
     public void parseSinglePodcast() throws IOException
     {
         HohmPodcast hp = HohmPodcast.parse(
-                new DataInputStream(new ByteArrayInputStream(sample)),
+                new InputImpl(new ByteArrayInputStream(sample)),
                 sample.length);
         
         assertEquals("http://www.tmbg.com/_media/_pod/podcast.xml", hp.url);
@@ -472,7 +470,7 @@ public class TestHohmPodcast
     public void parseMultiplePodcasts() throws IOException
     {
         HohmPodcast.dump(
-                new DataInputStream(new ByteArrayInputStream(fullSample)),
+                new InputImpl(new ByteArrayInputStream(fullSample)),
                 sample.length);
         
 //        HohmPodcast hp = HohmPodcast.parse(

@@ -20,8 +20,6 @@ package org.kafsemo.titl.art;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +34,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import org.kafsemo.titl.Input;
+import org.kafsemo.titl.InputImpl;
 import org.kafsemo.titl.Util;
 
 /**
@@ -48,7 +48,7 @@ public class ExtractArt
 {
     public static void main(String[] args) throws FileNotFoundException, IOException
     {
-        File f = new File("sample.itc2");
+        File f = new File("/tmp/sample.itc2");
 
         Collection<byte[]> streams = extract(f);
 
@@ -77,7 +77,7 @@ public class ExtractArt
 
         InputStream in = new FileInputStream(f);
         try {
-            DataInput di = new DataInputStream(in);
+            Input di = new InputImpl(in);
             while (remaining > 0) {
                 int bl = di.readInt();
                 String type = Util.toString(di.readInt());

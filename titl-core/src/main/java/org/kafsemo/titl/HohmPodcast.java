@@ -18,7 +18,6 @@
 
 package org.kafsemo.titl;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -47,7 +46,7 @@ public class HohmPodcast
         return new String(ba, 0, lnz, "utf-8");
     }
 
-    public static HohmPodcast parse(DataInput di, int length) throws IOException
+    public static HohmPodcast parse(Input di, int length) throws IOException
     {
         String url, link, aurl;
 
@@ -123,7 +122,7 @@ public class HohmPodcast
         return new HohmPodcast(url, link, aurl);
     }
 
-    static void dump(DataInput di, int length) throws IOException
+    static void dump(Input di, int length) throws IOException
     {
         di.skipBytes(12);
 
