@@ -24,6 +24,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.kafsemo.titl.Artwork;
+import org.kafsemo.titl.Library;
+import org.kafsemo.titl.Util;
+
 /**
  * Discovers all the files in the artwork directory.
  *
@@ -70,5 +74,35 @@ public class AlbumArtworkDirectory implements Iterable<File>
     public Iterator<File> iterator()
     {
         return Collections.unmodifiableCollection(files).iterator();
+    }
+    
+    public File get(Library l, Artwork art)
+    {
+        File d = new File(this.dir, "Cache");
+//        File d = new File(this.dir, "Download");
+        
+        String libDir = Util.pidToString(l.getLibraryPersistentId());
+
+        d = new File(d, libDir);
+
+        byte[] artId = art.getPersistentId();
+        
+        if (artId == null) {
+            return null;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%02d", artId[7] & 0x0F));
+        sb.append(File.separator);
+        sb.append(String.format("%02d", (artId[7] >> 4) & 0x0F));
+        sb.append(File.separator);
+        sb.append(String.format("%02d", artId[6] & 0x0F));
+        
+        d = new File(d, sb.toString());
+        
+        File f = new File(d,
+                libDir + "-" + Util.pidToString(artId) + ".itc2");
+
+        return f;
     }
 }

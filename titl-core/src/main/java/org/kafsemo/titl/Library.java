@@ -34,14 +34,17 @@ public class Library
     private final Collection<Playlist> playlists;
     private final Collection<Podcast> podcasts;
     private final Collection<Track> tracks;
+    private final Collection<Artwork> artwork;
 
-    public Library(Hdfm header, String path, Collection<Playlist> playlists, Collection<Podcast> podcasts, Collection<Track> tracks)
+    public Library(Hdfm header, String path, Collection<Playlist> playlists, Collection<Podcast> podcasts, Collection<Track> tracks,
+            Collection<Artwork> artwork)
     {
         this.hdr = header;
         this.path = path;
         this.playlists = playlists;
         this.podcasts = podcasts;
         this.tracks = tracks;
+        this.artwork = artwork;
     }
 
     public String getVersion()
@@ -85,18 +88,28 @@ public class Library
         return titles;
     }
 
+    private static <T> Collection<T> copy(Collection<T> coll)
+    {
+        return Collections.unmodifiableCollection(new ArrayList<T>(coll));
+    }
+    
     public Collection<Playlist> getPlaylists()
     {
-        return Collections.unmodifiableCollection(new ArrayList<Playlist>(playlists));
+        return copy(playlists);
     }
 
     public Collection<Track> getTracks()
     {
-        return Collections.unmodifiableCollection(new ArrayList<Track>(tracks));
+        return copy(tracks);
     }
 
     public Collection<Podcast> getPodcasts()
     {
-        return Collections.unmodifiableCollection(new ArrayList<Podcast>(podcasts));
+        return copy(podcasts);
+    }
+
+    public Collection<Artwork> getArtwork()
+    {
+        return copy(artwork);
     }
 }
