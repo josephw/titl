@@ -56,10 +56,17 @@ public class Library
 
     public byte[] getLibraryPersistentId()
     {
+        int i = 0;
+        
+        while (hdr.headerRemainder[i] == 0x00) {
+            i++;
+        }
+        
+        /* The ID comes after the first non-zero byte */
+        i++;
+        
         byte[] lpid = new byte[8];
-
-        System.arraycopy(hdr.headerRemainder, 30, lpid, 0, lpid.length);
-
+        System.arraycopy(hdr.headerRemainder, i, lpid, 0, lpid.length);
         return lpid;
     }
 

@@ -507,4 +507,26 @@ public class TestParseLibrary extends TestCase
         assertEquals("10.0.1", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
+    
+    public void testParseEmptyItunes10_1Library() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty iTunes 10.1 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("10.1", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("44328F10E636D81E", Util.pidToString(lib.getLibraryPersistentId()));
+    }
+    
+    public void testParseEmptyItunes10_2Library() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty iTunes 10.2 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("10.2.2", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("3A587ACD4CC64C31", Util.pidToString(lib.getLibraryPersistentId()));
+    }
 }
