@@ -779,12 +779,27 @@ public class ParseLibrary
         track.setDateAdded(Dates.fromMac(addDate));
 
 //        124      32     ?
-        di.skipBytes(32);
+        di.skipBytes(4);
+        byte[] persistentId = readPersistentId(di);
+        track.setPersistentId(persistentId);
+        
+        di.skipBytes(20);
 
 //        System.out.println("Last play date: " + Dates.fromMac(lastPlayDate));
 //        System.out.println("Add date: " + Dates.fromMac(addDate));
 
-        di.skipBytes(length - 156);
+        long remaining = length - 156;
+        
+        if (remaining > 152) {
+            di.skipBytes(144);
+            
+            byte[] id = readPersistentId(di);
+            remaining -= 152;
+
+            track.setAlbumPersistentId(id);
+        }
+        
+        di.skipBytes((int) remaining);
 
         tracks.add(track);
         currentTrack = track;
@@ -817,15 +832,14 @@ public class ParseLibrary
         
         di.skipBytes(24);
         
-        byte[] persistentId = new byte[8];
-        di.readFully(persistentId);
+        byte[] persistentId = readPersistentId(di);
         
         di.skipBytes(8);
         expectZeroBytes(di, 40);
         
         Artwork artwork;
         
-        if (!Arrays.equals(persistentId, BLANK_ID)) {
+        if (persistentId != null) {
             artwork = new Artwork(persistentId);
             resourcesWithArtwork.add(artwork);
             currentArtwork = artwork;
@@ -856,6 +870,18 @@ public class ParseLibrary
                 throw new ItlException("Expected " + count + " zero bytes" + where
                         + ". Was: 0x" + Integer.toHexString(b) + " at offset " + i);
             }
+        }
+    }
+    
+    static byte[] readPersistentId(Input di) throws IOException
+    {
+        byte[] id = new byte[8];
+        di.readFully(id);
+        
+        if (!Arrays.equals(id, BLANK_ID)) {
+            return id;
+        } else {
+            return null;
         }
     }
 }

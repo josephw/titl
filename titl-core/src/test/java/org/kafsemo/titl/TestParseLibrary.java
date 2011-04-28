@@ -529,4 +529,46 @@ public class TestParseLibrary extends TestCase
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
         assertEquals("3A587ACD4CC64C31", Util.pidToString(lib.getLibraryPersistentId()));
     }
+    
+    public void testParseItunes10_2LibraryWithSingleTrack() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/iTunes 10.2.2 Library with single track.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("10.2.2", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("35F8CA737C067601", Util.pidToString(lib.getLibraryPersistentId()));
+        
+        Collection<Track> tracks = lib.getTracks();
+        assertEquals(1, tracks.size());
+        
+        Track t = getTrack(tracks, 221);
+        
+        assertEquals("Here Sometimes", t.getName());
+        assertNull(t.getAlbumPersistentId());
+        
+        assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
+    }
+    
+    public void testParseItunes10_2LibraryWithTrackWithArtwork() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/iTunes 10.2.2 Library with single track with artwork.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("10.2.2", lib.getVersion());
+        assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("35F8CA737C067601", Util.pidToString(lib.getLibraryPersistentId()));
+        
+        Collection<Track> tracks = lib.getTracks();
+        assertEquals(1, tracks.size());
+        
+        // XXX Why is this 64 now, and still 221 in the XML?
+        Track t = getTrack(tracks, 64);
+        
+        assertEquals("Here Sometimes", t.getName());
+        assertEquals("00D1246314F75A0C", Util.pidToString(t.getAlbumPersistentId()));
+        assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
+    }
 }

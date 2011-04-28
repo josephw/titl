@@ -24,8 +24,6 @@ import java.util.Collections;
 
 /**
  * A high-level view of a library, including all the data extracted.
- *
- * @author Joseph
  */
 public class Library
 {

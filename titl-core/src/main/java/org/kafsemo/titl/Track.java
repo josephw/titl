@@ -38,7 +38,8 @@ public class Track
     private String location;
     private int rating;
     private String url;
-
+    private byte[] albumPersistentId;
+    
     public int getTrackId()
     {
         return trackId;
@@ -115,8 +116,7 @@ public class Track
     }
 
     public byte[] getPersistentId() {
-        // TODO Auto-generated method stub
-        return null;
+        return persistentId;
     }
 
     public String getTrackType() {
@@ -248,6 +248,7 @@ public class Track
     private String feedLink;
     private String localUrl;
     private String summary;
+    private byte[] persistentId;
 
     public void setPodcastUrl(String url)
     {
@@ -312,5 +313,20 @@ public class Track
     public void setItunesSummary(String summary)
     {
         this.summary = summary;
+    }
+
+    public void setAlbumPersistentId(byte[] id)
+    {
+        this.albumPersistentId = id;
+    }
+    
+    public byte[] getAlbumPersistentId()
+    {
+        return albumPersistentId;
+    }
+
+    public void setPersistentId(byte[] persistentId)
+    {
+        this.persistentId = persistentId;
     }
 }
