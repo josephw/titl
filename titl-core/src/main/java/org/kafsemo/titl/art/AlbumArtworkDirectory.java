@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.kafsemo.titl.Artwork;
 import org.kafsemo.titl.Library;
+import org.kafsemo.titl.Track;
 import org.kafsemo.titl.Util;
 
 /**
@@ -76,21 +77,36 @@ public class AlbumArtworkDirectory implements Iterable<File>
         return Collections.unmodifiableCollection(files).iterator();
     }
     
-    public File get(Library l, Artwork art)
+    public File getCache(Library l, Artwork art)
     {
-        File d = new File(this.dir, "Cache");
-//        File d = new File(this.dir, "Download");
+        byte[] artId = art.getPersistentId();
         
+        return get(l, "Cache", artId);
+    }
+    
+    public File getDownload(Library l, Track t)
+    {
+        byte[] artId = t.getAlbumPersistentId();
+        
+        return get(l, "Download", artId);
+    }
+    
+    public File get(Library l, String type, byte[] artId)
+    {
+        if (artId == null) {
+            return null;
+        }
+
+        if (!type.equals("Cache") && !type.equals("Download")) {
+            throw new IllegalArgumentException("Unknown type: " + type);
+        }
+        
+        File d = new File(this.dir, type);
+      
         String libDir = Util.pidToString(l.getLibraryPersistentId());
 
         d = new File(d, libDir);
 
-        byte[] artId = art.getPersistentId();
-        
-        if (artId == null) {
-            return null;
-        }
-        
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%02d", artId[7] & 0x0F));
         sb.append(File.separator);

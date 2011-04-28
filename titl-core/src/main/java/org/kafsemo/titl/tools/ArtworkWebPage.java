@@ -25,8 +25,12 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -35,6 +39,7 @@ import org.kafsemo.titl.Artwork;
 import org.kafsemo.titl.ItlException;
 import org.kafsemo.titl.Library;
 import org.kafsemo.titl.ParseLibrary;
+import org.kafsemo.titl.Track;
 import org.kafsemo.titl.art.AlbumArtworkDirectory;
 import org.kafsemo.titl.art.ExtractArt;
 
@@ -64,46 +69,54 @@ public class ArtworkWebPage
         Library l = ParseLibrary.parse(libFile);
         
         Collection<Artwork> artwork = l.getArtwork();
+        Collection<Track> tracks = l.getTracks();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outdir, "index.html")));
+
+        ArtworkWebPage awp = new ArtworkWebPage();
+        
+        Set<File> done = new HashSet<File>();
         
         try {
             bw.write("<!DOCTYPE html>");
             bw.newLine();
             
-            int idx = 0;
+            bw.write("<h1>Artwork</h1>\n");
+            
+            for (Track art : tracks) {
+                File f = artDir.getDownload(l, art);
+                
+                // XXX Should be escaped
+                bw.write("<h2>" + art.getName() + "</h1>");
+                bw.newLine();
+                bw.write("<h3>" + art.getArtist() + "</h2>");
+                bw.newLine();
+
+                if (done.contains(f)) {
+                    bw.write("<p>(Done.)</p>");
+                    bw.newLine();
+                } else for (String filename : awp.writeAsGfxFiles(outdir, f)) {
+                    // XXX Should be escaped
+                    bw.write("<img src='" + filename + "'>");
+                    bw.newLine();
+                    
+                    done.add(f);
+                }
+            }
+            
+            bw.write("<h1>Cached</h1>\n");
             
             for (Artwork art : artwork) {
-                File f = artDir.get(l, art);
-                
                 // XXX Should be escaped
                 bw.write("<h1>" + art.title + "</h1>");
                 bw.newLine();
                 bw.write("<h2>" + art.artist + "</h2>");
                 bw.newLine();
-                
-                if (f != null && f.isFile()) {
-                    Collection<byte[]> artStreams = ExtractArt.extract(f);
-    
-                    for (byte[] ba : artStreams) {
-                        String filename = "image-" + (idx++);
-                        
-                        filename += suffix(ba);
-                        File output = new File(outdir, filename);
-                        OutputStream out = new FileOutputStream(output);
-                        try {
-                            out.write(ba);
-                        } finally {
-                            out.close();
-                        }
-                        
-                        // XXX Should be escaped
-                        bw.write("<img src='" + filename + "'>");
-                        bw.newLine();
-                    }
-                    
-                } else {
-                    bw.write("<p>(No art.)</p>");
+  
+                File f = artDir.getCache(l, art);
+                for (String filename : awp.writeAsGfxFiles(outdir, f)) {
+                    // XXX Should be escaped
+                    bw.write("<img src='" + filename + "'>");
                     bw.newLine();
                 }
             }
@@ -111,7 +124,38 @@ public class ArtworkWebPage
             bw.close();
         }
     }
+
+    int imageIndex;
     
+    Iterable<String> writeAsGfxFiles(File outdir, File f)
+        throws IOException
+    {
+        if (f == null || !f.isFile()) {
+            return Collections.emptyList();
+        }
+        
+        Collection<byte[]> artStreams = ExtractArt.extract(f);
+
+        Collection<String> names = new ArrayList<String>(artStreams.size());
+        
+        for (byte[] ba : artStreams) {
+            String filename = "image-" + (imageIndex++);
+            
+            filename += suffix(ba);
+            File output = new File(outdir, filename);
+            OutputStream out = new FileOutputStream(output);
+            try {
+                out.write(ba);
+                
+                names.add(filename);
+            } finally {
+                out.close();
+            }
+        }
+        
+        return names;
+    }
+        
     static String suffix(byte[] ba) throws IOException
     {
         ByteArrayInputStream in = new ByteArrayInputStream(ba);
