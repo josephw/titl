@@ -19,26 +19,29 @@
 package org.kafsemo.titl.art;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.kafsemo.titl.Artwork;
 import org.kafsemo.titl.Library;
 import org.kafsemo.titl.Track;
-import org.kafsemo.titl.Util;
 
 /**
  * Discovers all the files in the artwork directory.
- *
- * @author Joseph
  */
 public class AlbumArtworkDirectory implements Iterable<File>
 {
     private final File dir;
-    private final List<File> files;
+    private Set<String> names;
 
+    private final Set<String> used = new HashSet<String>();
+    
     public AlbumArtworkDirectory(String dirName)
     {
         this(new File(dirName));
@@ -47,17 +50,36 @@ public class AlbumArtworkDirectory implements Iterable<File>
     public AlbumArtworkDirectory(File d)
     {
         this.dir = d;
-        files = new ArrayList<File>();
+        names = new HashSet<String>();
     }
 
-    public void scan()
+    private void scan()
     {
-        files.clear();
-        recurse(dir);
-        Collections.shuffle(files);
+        Set<String> names = new HashSet<String>();
+        
+        Collection<File> files = new ArrayList<File>();
+        recurse(dir, files);
+        
+        URI base = dir.toURI();
+        
+        for (File f : files) {
+            String relPath = base.relativize(f.toURI()).toString();
+            names.add(relPath);
+        }
+        
+        this.names = names;
     }
 
-    private void recurse(File f)
+    private Set<String> getNames()
+    {
+        if (names == null) {
+            scan();
+        }
+        
+        return names;
+    }
+    
+    private void recurse(File f, Collection<File> files)
     {
         if (f.isFile()) {
             files.add(f);
@@ -65,7 +87,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
             File[] fa = f.listFiles();
             if (fa != null) {
                 for (File sf : fa) {
-                    recurse(sf);
+                    recurse(sf, files);
                 }
             }
         }
@@ -74,51 +96,80 @@ public class AlbumArtworkDirectory implements Iterable<File>
     @Override
     public Iterator<File> iterator()
     {
-        return Collections.unmodifiableCollection(files).iterator();
+        return asFiles(getNames()).iterator();
+    }
+    
+    private Iterable<File> asFiles(Iterable<String> names)
+    {
+        Collection<File> files = new ArrayList<File>();
+        for (String n : names) {
+            files.add(new File(dir, n));
+        }
+        return Collections.unmodifiableCollection(files);
+    }
+    
+    public Iterable<File> getUnused()
+    {
+        scan();
+        
+        Collection<String> c = new HashSet<String>(names);
+        c.removeAll(used);
+        
+        List<String> inOrder = new ArrayList<String>(c);
+        Collections.sort(inOrder);
+        return asFiles(inOrder);
     }
     
     public File getCache(Library l, Artwork art)
     {
         byte[] artId = art.getPersistentId();
         
-        return get(l, "Cache", artId);
+        return get(l, ArtworkFile.Directory.Cache, artId);
     }
     
     public File getDownload(Library l, Track t)
     {
         byte[] artId = t.getAlbumPersistentId();
         
-        return get(l, "Download", artId);
+        get(l, ArtworkFile.Directory.Cache, artId);
+        return get(l, ArtworkFile.Directory.Download, artId);
     }
     
-    public File get(Library l, String type, byte[] artId)
+    public File get(Library l, Track t)
+    {
+        byte[] artId = t.getAlbumPersistentId();
+        
+        File f = get(l, ArtworkFile.Directory.Download, artId);
+        if (f != null && f.isFile()) {
+            return f;
+        } else {
+            return get(l, ArtworkFile.Directory.Cache, artId);
+        }
+    }
+    
+    public File get(Library l, ArtworkFile.Directory type, byte[] artId)
     {
         if (artId == null) {
             return null;
         }
 
-        if (!type.equals("Cache") && !type.equals("Download")) {
-            throw new IllegalArgumentException("Unknown type: " + type);
-        }
+        ArtworkFile af = new ArtworkFile(type, artId, 2);
         
-        File d = new File(this.dir, type);
-      
-        String libDir = Util.pidToString(l.getLibraryPersistentId());
-
-        d = new File(d, libDir);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%02d", artId[7] & 0x0F));
-        sb.append(File.separator);
-        sb.append(String.format("%02d", (artId[7] >> 4) & 0x0F));
-        sb.append(File.separator);
-        sb.append(String.format("%02d", artId[6] & 0x0F));
+        String f = af.toString(l.getLibraryPersistentId());
         
-        d = new File(d, sb.toString());
+//        ArtworkFile af1 = new ArtworkFile(type, artId, 1);
+//        
+//        String f1 = af1.toString(l.getLibraryPersistentId());
+//
+//        if (getNames().contains(f1)) {
+//            f = f1;
+//        } else {
+//            f = null;
+//            return null;
+//        }
         
-        File f = new File(d,
-                libDir + "-" + Util.pidToString(artId) + ".itc2");
-
-        return f;
+        used.add(f);
+        
+        return new File(dir, f);
     }
 }

@@ -63,7 +63,6 @@ public class ShowAllArtwork
         jf.setVisible(true);
 
         AlbumArtworkDirectory aad = new AlbumArtworkDirectory(new File(iTunesDirectory, "Album Artwork"));
-        aad.scan();
 
         Random r = new Random();
 

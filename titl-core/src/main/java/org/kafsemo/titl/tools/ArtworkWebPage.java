@@ -22,9 +22,9 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -71,14 +71,17 @@ public class ArtworkWebPage
         Collection<Artwork> artwork = l.getArtwork();
         Collection<Track> tracks = l.getTracks();
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(outdir, "index.html")));
+        BufferedWriter bw = new BufferedWriter(
+                new OutputStreamWriter(
+                        new FileOutputStream(new File(outdir, "index.html")), "utf-8"));
 
         ArtworkWebPage awp = new ArtworkWebPage();
         
         Set<File> done = new HashSet<File>();
         
         try {
-            bw.write("<!DOCTYPE html>");
+            bw.write("<!DOCTYPE html>\n");
+            bw.write("<meta charset=utf-8>\n");
             bw.newLine();
             
             bw.write("<h1>Artwork</h1>\n");
@@ -108,12 +111,24 @@ public class ArtworkWebPage
             
             for (Artwork art : artwork) {
                 // XXX Should be escaped
-                bw.write("<h1>" + art.title + "</h1>");
+                bw.write("<h2>" + art.title + "</h1>");
                 bw.newLine();
-                bw.write("<h2>" + art.artist + "</h2>");
+                bw.write("<h3>" + art.artist + "</h2>");
                 bw.newLine();
   
                 File f = artDir.getCache(l, art);
+                for (String filename : awp.writeAsGfxFiles(outdir, f)) {
+                    // XXX Should be escaped
+                    bw.write("<img src='" + filename + "'>");
+                    bw.newLine();
+                }
+            }
+            
+            bw.write("<h1>Other</h1>");
+            
+            for (File f : artDir.getUnused()) {
+                bw.write("<h3>" + f.getName() + "</h3>\n");
+                
                 for (String filename : awp.writeAsGfxFiles(outdir, f)) {
                     // XXX Should be escaped
                     bw.write("<img src='" + filename + "'>");
@@ -162,7 +177,7 @@ public class ArtworkWebPage
         
         Iterator<ImageReader> x = ImageIO.getImageReaders(ImageIO.createImageInputStream(in));
         if (x.hasNext()) {
-            return "." + x.next().getFormatName();
+            return "." + x.next().getFormatName().toLowerCase();
         } else {
             return "";
         }
