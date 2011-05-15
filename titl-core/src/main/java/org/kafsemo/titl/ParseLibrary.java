@@ -745,6 +745,7 @@ public class ParseLibrary
 
 //         76       4     playcount
         int playcount = di.readInt();
+        track.setPlayCount(playcount);
 
 //         80       2     ?
 //         82       2     compilation (1 = yes, 0 = no)
@@ -762,6 +763,7 @@ public class ParseLibrary
 
 //        100       4     last play date
         int lastPlayDate = di.readInt();
+        track.setLastPlayDate(Dates.fromMac(lastPlayDate));
 
 //        104       2     disk number
 //        106       2     total disks

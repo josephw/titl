@@ -9,6 +9,7 @@
 
   <modules>
     <module>titl-core</module>
+    <module>titl-rdf</module>
   </modules>
 
   <dependencyManagement>

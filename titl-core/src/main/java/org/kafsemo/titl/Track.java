@@ -249,6 +249,8 @@ public class Track
     private String localUrl;
     private String summary;
     private byte[] persistentId;
+    private int playcount;
+    private Date playDate;
 
     public void setPodcastUrl(String url)
     {
@@ -328,5 +330,29 @@ public class Track
     public void setPersistentId(byte[] persistentId)
     {
         this.persistentId = persistentId;
+    }
+
+    public void setPlayCount(int playcount)
+    {
+        this.playcount = playcount;
+    }
+    
+    public int getPlayCount()
+    {
+        return this.playcount;
+    }
+
+    public void setLastPlayDate(Date playDate)
+    {
+        if (playDate != null) {
+            this.playDate = new Date(playDate.getTime());
+        } else {
+            this.playDate = null;
+        }
+    }
+    
+    public Date getLastPlayDate()
+    {
+        return this.playDate;
     }
 }
