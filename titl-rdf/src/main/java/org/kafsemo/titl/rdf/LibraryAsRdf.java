@@ -12,6 +12,8 @@ import org.kafsemo.titl.Library;
 import org.kafsemo.titl.ParseLibrary;
 import org.kafsemo.titl.Track;
 import org.kafsemo.titl.Util;
+import org.kafsemo.titl.art.AlbumArtworkDirectory;
+import org.kafsemo.titl.tools.ArtworkWebPage;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.LiteralImpl;
@@ -48,14 +50,26 @@ public class LibraryAsRdf
     
     public static void main(String[] args) throws RDFHandlerException, IOException, ItlException
     {
-        if (args.length != 1) {
-            System.err.println("Usage: LibraryAsRdf <iTunes Library.itl>");
+        if (args.length != 1 && args.length != 2) {
+            System.err.println("Usage: LibraryAsRdf <iTunes Library.itl> [artwork output directory]");
             System.exit(5);
         }
         
         String filename = args[0];
         
-        Library lib = ParseLibrary.parse(new File(filename));
+        File artworkOutput;
+        if (args.length == 2) {
+            artworkOutput = new File(args[1]);
+        } else {
+            artworkOutput = null;
+        }
+        
+        File libFile = new File(filename);
+        
+        Library lib = ParseLibrary.parse(libFile);
+        
+        AlbumArtworkDirectory artDir = new AlbumArtworkDirectory(ArtworkWebPage.artworkDirectoryFor(libFile));
+        ArtworkWebPage awp = new ArtworkWebPage();
         
         RDFWriter rw = new TurtleWriterFactory().getWriter(System.out);
 
@@ -106,6 +120,14 @@ public class LibraryAsRdf
             
             if (persistentId != null) {
                 rw.handleStatement(new StatementImpl(res, ITUNES_PERSISTENT_ID, new LiteralImpl(Util.pidToString(persistentId))));
+            }
+            
+            if (artworkOutput != null) {
+                File f = artDir.getDownload(lib, t);
+                for (String artFile : awp.writeAsGfxFiles(artworkOutput, f)) {
+                    String artFileUri = new File(artworkOutput, artFile).toURI().toASCIIString();
+                    rw.handleStatement(new StatementImpl(res, NID3_ATTACHED_PICTURE, new URIImpl(artFileUri)));
+                }
             }
         }
         rw.endRDF();

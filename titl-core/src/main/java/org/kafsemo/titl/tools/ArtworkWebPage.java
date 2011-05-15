@@ -28,8 +28,10 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -64,7 +66,7 @@ public class ArtworkWebPage
         
         outdir.mkdir();
         
-        AlbumArtworkDirectory artDir = new AlbumArtworkDirectory(new File(libFile.getParentFile(), "Album Artwork"));
+        AlbumArtworkDirectory artDir = new AlbumArtworkDirectory(artworkDirectoryFor(libFile));
         
         Library l = ParseLibrary.parse(libFile);
         
@@ -140,13 +142,25 @@ public class ArtworkWebPage
         }
     }
 
+    public static File artworkDirectoryFor(File libFile)
+    {
+        File artDir = new File(libFile.getParentFile(), "Album Artwork");
+        return artDir;
+    }
+    
+    Map<File, Iterable<String>> written = new HashMap<File, Iterable<String>>();
     int imageIndex;
     
-    Iterable<String> writeAsGfxFiles(File outdir, File f)
+    public Iterable<String> writeAsGfxFiles(File outdir, File f)
         throws IOException
     {
         if (f == null || !f.isFile()) {
             return Collections.emptyList();
+        }
+
+        Iterable<String> alreadyWritten = written.get(f);
+        if (alreadyWritten != null) {
+            return alreadyWritten;
         }
         
         Collection<byte[]> artStreams = ExtractArt.extract(f);
@@ -167,6 +181,8 @@ public class ArtworkWebPage
                 out.close();
             }
         }
+
+        written.put(f, names);
         
         return names;
     }
