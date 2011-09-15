@@ -38,11 +38,13 @@ import org.kafsemo.titl.ProcessLibrary;
  */
 public class MoveMusic implements ProcessLibrary.StringConverter
 {
+    private final String libraryFilename;
     private final String origDir, destDir;
     private boolean useUrls;
 
-    public MoveMusic(String string, String string2)
+    public MoveMusic(String libraryFilename, String string, String string2)
     {
+        this.libraryFilename = libraryFilename;
         origDir = string;
         destDir = string2;
         useUrls = false;
@@ -50,7 +52,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
 
     public static MoveMusic fromArgs(String[] args)
     {
-        if (args.length < 2) {
+        if (args.length < 3) {
             return null;
         }
         
@@ -68,13 +70,18 @@ public class MoveMusic implements ProcessLibrary.StringConverter
             firstPath = 0;
         }
         
-        if (args.length - firstPath != 2) {
+        if (args.length - firstPath != 3) {
             return null;
         }
         
-        MoveMusic mm = new MoveMusic(args[firstPath], args[firstPath + 1]);
+        MoveMusic mm = new MoveMusic(args[firstPath], args[firstPath + 1], args[firstPath + 2]);
         mm.setUseUrls(useUrls);
         return mm;
+    }
+    
+    String getLibraryFilename()
+    {
+        return libraryFilename;
     }
     
     String getOrigDir()
@@ -86,7 +93,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
     {
         return destDir;
     }
-    
+
     boolean isUseUrls()
     {
         return useUrls;
@@ -117,7 +124,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
             pl.register(0x0D, mm);
         }
 
-        File f = new File(args[0]);
+        File f = new File(mm.getLibraryFilename());
 
         File f2 = new File(f.getParentFile(), f.getName() + ".processed");
         if (f2.exists()) {
@@ -149,3 +156,4 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         }
     }
 }
+

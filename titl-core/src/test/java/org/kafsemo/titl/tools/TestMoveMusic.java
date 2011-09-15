@@ -28,33 +28,59 @@ import org.junit.Test;
 public class TestMoveMusic
 {
     @Test
-    public void parseArgs()
+    public void enoughArguments()
     {
-        assertNull("At least two arguments must be provided", MoveMusic.fromArgs(new String[0]));
-        assertNull("At least two arguments must be provided", MoveMusic.fromArgs(new String[1]));
-
+        assertNull("At least three arguments must be provided", MoveMusic.fromArgs(new String[0]));
+        assertNull("At least three arguments must be provided", MoveMusic.fromArgs(new String[1]));
+        assertNull("At least three arguments must be provided", MoveMusic.fromArgs(new String[2]));
+    }
+    
+    @Test
+    public void minimalArguments()
+    {
         MoveMusic mm;
         
-        mm = MoveMusic.fromArgs(new String[]{"a", "b"});
+        mm = MoveMusic.fromArgs(new String[]{"lib", "a", "b"});
+        assertEquals("lib", mm.getLibraryFilename());
         assertEquals("a", mm.getOrigDir());
         assertEquals("b", mm.getDestDir());
         assertFalse("Default is not to use URLs", mm.isUseUrls());
+    }
+    
+    @Test
+    public void useUrlsFlag()
+    {
+        MoveMusic mm;
         
-        mm = MoveMusic.fromArgs(new String[]{"--use-urls", "a", "b"});
+        mm = MoveMusic.fromArgs(new String[]{"--use-urls", "lib", "a", "b"});
+        assertEquals("lib", mm.getLibraryFilename());
         assertEquals("a", mm.getOrigDir());
         assertEquals("b", mm.getDestDir());
         assertTrue("Use URLs when requested", mm.isUseUrls());
-        
+    }
+    
+    @Test
+    public void badArguments()
+    {
         assertNull("A switch is not an acceptable argument",
                 MoveMusic.fromArgs(new String[]{"--use-urls", "a"}));
         
         assertNull("Too many arguments is a problem",
-                MoveMusic.fromArgs(new String[]{"a", "b", "c"}));
+                MoveMusic.fromArgs(new String[]{"a", "b", "c","d"}));
         
         assertNull("Too many arguments is a problem",
-                MoveMusic.fromArgs(new String[]{"--use-urls", "a", "b", "c"}));
+                MoveMusic.fromArgs(new String[]{"--use-urls", "a", "b", "c", "d"}));
         
         assertNull("An unknown switch is a problem",
                 MoveMusic.fromArgs(new String[]{"--unknown", "a", "b"}));
+    }
+    
+    @Test
+    public void testConversion()
+    {
+        MoveMusic mm = new MoveMusic(null, "before-", "after-");
+        assertEquals("xxx", mm.convert("xxx"));
+        assertEquals("after-xx", mm.convert("before-xx"));
+        assertEquals("after-xx", mm.convert("after-xx"));
     }
 }
