@@ -358,11 +358,13 @@ public class ParseLibrary
                     case 0x2D: // A version string?
                     case 0x2E: // Copyright notice?
                     case 0x2F:
+                    case 0x34:
                     case 0xc8: // Podcast episode list title
                     case 0xC9: // Podcast title
                     case 0x1F8: // A UUID. For?
                     case 0x1F9: // A UUID. For?
                     case 0x1FA: // An email address. For?
+                    case 0x1FC: // The library name?
                     case 0x191: // Artist name without 'The'; sort artist
                         String val = readGenericHohm(di);
                         consumed = recLength;
