@@ -15,6 +15,7 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.kafsemo.titl;
 
 import java.io.ByteArrayOutputStream;
@@ -27,7 +28,7 @@ import java.util.List;
  */
 class PlaylistRawItems
 {    
-    public int expectedItemCount;
+    public final int expectedItemCount;
     public long itemStartOffset;
     private final List<Integer> itemIds = new ArrayList<Integer>();
     private final List<ByteArrayOutputStream> itemBytes = new ArrayList<ByteArrayOutputStream>();   

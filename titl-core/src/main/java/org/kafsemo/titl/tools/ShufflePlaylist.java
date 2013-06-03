@@ -32,12 +32,6 @@ import org.kafsemo.titl.RandomizePlaylist;
  */
 public class ShufflePlaylist
 {
-    /**
-     *
-     * @param args
-     * @throws IOException
-     * @throws ItlException
-     */
     public static void main(String[] args) throws IOException, ItlException
     {
         if (args.length != 3) {

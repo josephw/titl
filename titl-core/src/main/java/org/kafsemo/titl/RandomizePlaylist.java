@@ -15,6 +15,7 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.kafsemo.titl;
 
 import java.io.ByteArrayInputStream;
@@ -53,8 +54,8 @@ public class RandomizePlaylist {
         try {
             randomizePlaylist(in, fileLength, out, s);
         } finally {
-            in.close();
             out.close();
+            in.close();
         }
     }
     
@@ -123,7 +124,7 @@ public class RandomizePlaylist {
         hdr.write(dos, outputData);
     }    
 
-    static void PrintData(byte [] data)
+    static void printData(byte [] data)
     {
         int idx = 0;
         while (idx < data.length)
@@ -233,7 +234,7 @@ public class RandomizePlaylist {
                     // no other hohm types should occur inside a playlist. If
                     // they do then assume that the playlist has ended
                     default: 
-                        if (EndCurrentPlaylist(foundPlaylist))
+                        if (endCurrentPlaylist(foundPlaylist))
                             return currentPlaylistItems;
                         di.skipBytes(recLength - consumed);
                         consumed = recLength;
@@ -244,7 +245,7 @@ public class RandomizePlaylist {
             else if (type.equals("hpim"))
             {
                 // Starting a new playlist ends the current playlist
-                if (EndCurrentPlaylist(foundPlaylist))
+                if (endCurrentPlaylist(foundPlaylist))
                     return currentPlaylistItems;              
                 readHpim(di, length);
                 firstItemFound = false;
@@ -263,7 +264,7 @@ public class RandomizePlaylist {
             else if(type.equals("hdsm"))
             {    
                 // End the current playlist on hdsm as well
-                if (EndCurrentPlaylist(foundPlaylist))
+                if (endCurrentPlaylist(foundPlaylist))
                     return currentPlaylistItems;                                  
                 going = !readHdsm(di, length);
                 consumed = length;
@@ -276,7 +277,7 @@ public class RandomizePlaylist {
             {                
                 di.skipBytes(length - consumed);
                 consumed = length;                
-                if (EndCurrentPlaylist(foundPlaylist))
+                if (endCurrentPlaylist(foundPlaylist))
                     return currentPlaylistItems;                                   
             }
             else
@@ -355,7 +356,7 @@ public class RandomizePlaylist {
         currentPlaylistItems.addItem(key, bo); 
     }
    
-    boolean EndCurrentPlaylist(boolean foundPlaylist) throws ItlException
+    boolean endCurrentPlaylist(boolean foundPlaylist) throws ItlException
     {
         // Ensure that when a playlist ends that the correct number of playlist
         // items were found and if the current playlist is not the desired
