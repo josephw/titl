@@ -101,9 +101,17 @@ public class ParseLibrary
         return library;
     }
 
+    private static final byte[] flippedHdsm = {'m', 's', 'd', 'h'};
+
     static Input inputFor(byte[] fileData)
     {
-        return new InputImpl(new ByteArrayInputStream(fileData));
+        InputStream in = new ByteArrayInputStream(fileData);
+
+        if (fileData.length >= 4 && Arrays.equals(flippedHdsm, Arrays.copyOfRange(fileData, 0, 4))) {
+            return new FlippedInputImpl(in);
+        } else {
+            return new InputImpl(in);
+        }
     }
 
     String drain(Input di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException

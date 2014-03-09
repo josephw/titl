@@ -600,4 +600,18 @@ public class TestParseLibrary
         assertEquals(Util.fromString("hdsm"), input.readInt());
         assertEquals(0x00000001, input.readInt());
     }
+
+    @Test
+    public void inputForReturnsAByteFlippedInputForAStreamStartingWithMsdh() throws IllegalArgumentException, IOException
+    {
+        byte[] stream = {
+                'm', 's', 'd', 'h',
+                1, 0, 0, 0
+        };
+
+        Input input = ParseLibrary.inputFor(stream);
+        assertNotNull(input);
+        assertEquals(Util.fromString("hdsm"), input.readInt());
+        assertEquals(0x00000001, input.readInt());
+    }
 }
