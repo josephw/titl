@@ -586,4 +586,44 @@ public class TestParseLibrary
         assertEquals("00D1246314F75A0C", Util.pidToString(t.getAlbumPersistentId()));
         assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
     }
+
+    @Test
+    public void inputForReturnsAnInput() throws IllegalArgumentException, IOException
+    {
+        byte[] stream = {
+                'h', 'd', 's', 'm',
+                0, 0, 0, 1
+        };
+
+        Input input = ParseLibrary.inputFor(stream);
+        assertNotNull(input);
+        assertEquals(Util.fromString("hdsm"), input.readInt());
+        assertEquals(0x00000001, input.readInt());
+    }
+
+    @Test
+    public void inputForReturnsAByteFlippedInputForAStreamStartingWithMsdh() throws IllegalArgumentException, IOException
+    {
+        byte[] stream = {
+                'm', 's', 'd', 'h',
+                1, 0, 0, 0
+        };
+
+        Input input = ParseLibrary.inputFor(stream);
+        assertNotNull(input);
+        assertEquals(Util.fromString("hdsm"), input.readInt());
+        assertEquals(0x00000001, input.readInt());
+    }
+
+    @Test
+    public void parseEmptyLibraryFromOsX() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty OS X iTunes 11.1.5 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("11.1.5", lib.getVersion());
+        assertEquals("file://localhost/Users/joe/Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("C4409DDF7C1D6E21", Util.pidToString(lib.getLibraryPersistentId()));
+    }
 }

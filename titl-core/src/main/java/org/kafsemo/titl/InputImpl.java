@@ -18,33 +18,36 @@
 
 package org.kafsemo.titl;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class InputImpl extends DataInputStream implements Input
+public class InputImpl implements Input
 {
+    private final InputStream in;
+    private final DataInput di;
     private long position = 0;
-    
+
     public InputImpl(InputStream in)
     {
-        super(null);
         this.in = new CountingInputStream(in);
+        this.di = new DataInputStream(this.in);
     }
 
     public long getPosition()
     {
         return position;
     }
-    
+
     private class CountingInputStream extends FilterInputStream
     {
         public CountingInputStream(InputStream in)
         {
             super(in);
         }
-        
+
         @Override
         public int read() throws IOException
         {
@@ -54,7 +57,7 @@ public class InputImpl extends DataInputStream implements Input
             }
             return r;
         }
-        
+
         @Override
         public int read(byte[] b, int off, int len) throws IOException
         {
@@ -64,7 +67,7 @@ public class InputImpl extends DataInputStream implements Input
             }
             return count;
         }
-        
+
         @Override
         public long skip(long n) throws IOException
         {
@@ -74,5 +77,35 @@ public class InputImpl extends DataInputStream implements Input
             }
             return count;
         }
+    }
+
+    @Override
+    public int readUnsignedByte() throws IOException
+    {
+        return di.readUnsignedByte();
+    }
+
+    @Override
+    public short readShort() throws IOException
+    {
+        return di.readShort();
+    }
+
+    @Override
+    public int readInt() throws IOException
+    {
+        return di.readInt();
+    }
+
+    @Override
+    public void readFully(byte[] b) throws IOException
+    {
+        di.readFully(b);
+    }
+
+    @Override
+    public int skipBytes(int n) throws IOException
+    {
+        return di.skipBytes(n);
     }
 }

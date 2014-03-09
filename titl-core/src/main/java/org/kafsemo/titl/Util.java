@@ -92,7 +92,7 @@ public class Util
     }
 
     private static Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
-    
+
     public static boolean isIdentifier(String id)
     {
         return ID_PATTERN.matcher(id).matches();

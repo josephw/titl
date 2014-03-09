@@ -51,10 +51,10 @@ public class ParseLibrary
     private Track currentTrack;
 
     private List<InputRange> diagnostics = new ArrayList<InputRange>();
-    
+
     private List<Artwork> resourcesWithArtwork = new ArrayList<Artwork>();
     private Artwork currentArtwork;
-    
+
     public static void main(String[] args) throws Exception
     {
         if (args.length != 1) {
@@ -82,7 +82,7 @@ public class ParseLibrary
             in.close();
         }
     }
-    
+
     public static Library parse(InputStream in, long fileLength) throws IOException, ItlException
     {
         Input di = new InputImpl(in);
@@ -91,14 +91,27 @@ public class ParseLibrary
 
         ParseLibrary pl = new ParseLibrary();
 
-        String path = pl.drain(new InputImpl(new ByteArrayInputStream(hdr.fileData)), hdr.fileData.length);
+        String path = pl.drain(inputFor(hdr.fileData), hdr.fileData.length);
 
 //        for (InputRange ir : pl.diagnostics) {
 //            System.out.println(ir);
 //        }
-        
+
         Library library = new Library(hdr, path, pl.playlists, pl.podcasts, pl.tracks, pl.resourcesWithArtwork);
         return library;
+    }
+
+    private static final byte[] flippedHdsm = {'m', 's', 'd', 'h'};
+
+    static Input inputFor(byte[] fileData)
+    {
+        InputStream in = new ByteArrayInputStream(fileData);
+
+        if (fileData.length >= 4 && Arrays.equals(flippedHdsm, Arrays.copyOfRange(fileData, 0, 4))) {
+            return new FlippedInputImpl(in);
+        } else {
+            return new InputImpl(in);
+        }
     }
 
     String drain(Input di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException
@@ -139,7 +152,7 @@ public class ParseLibrary
 //                System.out.printf("hohm type: 0x%02x - ", hohmType);
 
                 thisChunk.more = hohmType;
-                
+
                 switch (hohmType)
                 {
                     case 1:
@@ -282,19 +295,19 @@ public class ParseLibrary
                         consumed = recLength;
                         thisChunk.details = pcArtist;
                         break;
-                        
+
                     case 0x12E: // Artist again? Album artist?
                         thisChunk.details = readGenericHohm(di);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x132: // App title
                         String appTitle = readGenericHohm(di);
                         currentArtwork.setAppTitle(appTitle);
                         consumed = recLength;
                         thisChunk.details = appTitle;
                         break;
-                        
+
                     case 0x17: // iTunes podcast keywords
                         String keywords = readGenericHohm(di);
                         currentTrack.setItunesKeywords(keywords);
@@ -342,7 +355,7 @@ public class ParseLibrary
                         String plist = new String(xmlBa);
                         consumed = recLength;
                         break;
-                        
+
                     case 0x09: // iTunes category?
 
                     case 0x08:
@@ -420,8 +433,11 @@ public class ParseLibrary
                     case 0x69:
                     case 0x6A: // A list of bands?
                     case 0x6b:
+                    case 0x6c:
                     case 0x1f7:
                     case 0x1f4:
+                    case 0x202: // ?? XML plist
+                    case 0x320:
 //                        int words = (recLength - consumed) / 4;
 //                        hexDump(di, words);
 //                        hexDumpBytes(di, (recLength - consumed) - words * 4);
@@ -439,7 +455,7 @@ public class ParseLibrary
                     case 0x1c:  //  mpaa Rating                             'Content Rating'
                     case 0x1d:  //  ?? DTD for Propertylist                 --n/a--
                     case 0x23:  //  Sort-order for show title               'Sort Series'
-                    case 0x130: //  ??  Show/Series: I think it's used for 
+                    case 0x130: //  ??  Show/Series: I think it's used for
                                 //      building the 'TV Shows' menu, since
                                 //      there's one entry for each 'Season'
                                 //      within a given show.
@@ -485,7 +501,7 @@ public class ParseLibrary
                 consumed = length;
             }
             else if (type.equals("hghm") || type.equals("halm") || type.equals("hilm") || type.equals("htlm") || type.equals("hplm")
-                    || type.equals("hiim"))
+                    || type.equals("hiim") || type.equals("hslm") || type.equals("hpsm"))
             {
                 di.skipBytes(length - consumed);
                 consumed = length;
@@ -786,23 +802,23 @@ public class ParseLibrary
         di.skipBytes(4);
         byte[] persistentId = readPersistentId(di);
         track.setPersistentId(persistentId);
-        
+
         di.skipBytes(20);
 
 //        System.out.println("Last play date: " + Dates.fromMac(lastPlayDate));
 //        System.out.println("Add date: " + Dates.fromMac(addDate));
 
         long remaining = length - 156;
-        
+
         if (remaining > 152) {
             di.skipBytes(144);
-            
+
             byte[] id = readPersistentId(di);
             remaining -= 152;
 
             track.setAlbumPersistentId(id);
         }
-        
+
         di.skipBytes((int) remaining);
 
         tracks.add(track);
@@ -821,28 +837,28 @@ public class ParseLibrary
     }
 
     private static final byte[] BLANK_ID = new byte[8];
-    
+
     /* A Podcast header? */
     String readHaim(Input di, int length) throws ItlException, IOException
     {
         if (length != 80) {
             throw new IOException("Unexpected HAIM length. Expected 80, was " + length);
         }
-        
+
         Podcast p = new Podcast();
         podcasts.add(p);
 
         currentTrack = p;
-        
+
         di.skipBytes(24);
-        
+
         byte[] persistentId = readPersistentId(di);
-        
+
         di.skipBytes(8);
         expectZeroBytes(di, 40);
-        
+
         Artwork artwork;
-        
+
         if (persistentId != null) {
             artwork = new Artwork(persistentId);
             resourcesWithArtwork.add(artwork);
@@ -851,7 +867,7 @@ public class ParseLibrary
 //            System.out.println("ID was: " + Util.pidToString(persistentId));
             return Util.pidToString(persistentId);
         } else {
-            artwork = new Artwork(); 
+            artwork = new Artwork();
             resourcesWithArtwork.add(artwork);
             currentArtwork = artwork;
             return null;
@@ -862,12 +878,12 @@ public class ParseLibrary
     {
         expectZeroBytes(di, count, "");
     }
-    
+
     static void expectZeroBytes(Input di, int count, String where) throws IOException, ItlException
     {
         byte[] ba = new byte[count];
         di.readFully(ba);
-        
+
         for (int i = 0; i < ba.length; i++) {
             byte b = ba[i];
             if (b != 0x00) {
@@ -876,12 +892,12 @@ public class ParseLibrary
             }
         }
     }
-    
+
     static byte[] readPersistentId(Input di) throws IOException
     {
         byte[] id = new byte[8];
         di.readFully(id);
-        
+
         if (!Arrays.equals(id, BLANK_ID)) {
             return id;
         } else {

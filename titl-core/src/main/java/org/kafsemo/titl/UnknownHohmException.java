@@ -26,14 +26,14 @@ public class UnknownHohmException extends ItlException
 {
     private final int hohmType;
     private final byte[] contents;
-    
+
     public UnknownHohmException(int hohmType, byte[] contents)
     {
         super(null);
         this.hohmType = hohmType;
         this.contents = contents;
     }
-    
+
     @Override
     public String getMessage()
     {
@@ -41,7 +41,7 @@ public class UnknownHohmException extends ItlException
         sb.append("Unknown type: ");
         sb.append(hohmType);
         sb.append(String.format(" (0x%X)", hohmType));
- 
+
         int len = Math.min(contents.length, 64);
 
         /* Hex */
@@ -70,11 +70,11 @@ public class UnknownHohmException extends ItlException
                 sb.append('.');
             }
         }
-        
+
         if (len < contents.length) {
             sb.append(" ...");
         }
-        
+
         return sb.toString();
     }
 }
