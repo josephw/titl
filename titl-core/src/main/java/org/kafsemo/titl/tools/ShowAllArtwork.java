@@ -44,7 +44,7 @@ public class ShowAllArtwork
 {
     private static final Logger log = Logger.getLogger(ShowAllArtwork.class.getName());
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, InterruptedException
     {
         if (args.length != 1) {
             System.err.println("Usage: ShowAllArtwork <iTunes directory>");
@@ -67,6 +67,9 @@ public class ShowAllArtwork
         Random r = new Random();
 
         for (File f : aad) {
+            if (!f.isFile()) {
+                continue;
+            }
             Collection<byte[]> streams = ExtractArt.extract(f);
 
             for (byte[] ba : streams) {
@@ -76,7 +79,7 @@ public class ShowAllArtwork
                     log.warning("Unable to load file: " + f);
                     continue;
                 }
-                
+
                 Dimension d = jp.getSize();
 
                 int x, y;
@@ -90,6 +93,7 @@ public class ShowAllArtwork
                 }
 
                 jp.getGraphics().drawImage(img, x, y, null);
+                Thread.sleep(100);
             }
         }
     }

@@ -41,7 +41,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
     private Set<String> names;
 
     private final Set<String> used = new HashSet<String>();
-    
+
     public AlbumArtworkDirectory(String dirName)
     {
         this(new File(dirName));
@@ -50,23 +50,23 @@ public class AlbumArtworkDirectory implements Iterable<File>
     public AlbumArtworkDirectory(File d)
     {
         this.dir = d;
-        names = new HashSet<String>();
+        names = null;
     }
 
     private void scan()
     {
         Set<String> names = new HashSet<String>();
-        
+
         Collection<File> files = new ArrayList<File>();
         recurse(dir, files);
-        
+
         URI base = dir.toURI();
-        
+
         for (File f : files) {
             String relPath = base.relativize(f.toURI()).toString();
             names.add(relPath);
         }
-        
+
         this.names = names;
     }
 
@@ -75,10 +75,10 @@ public class AlbumArtworkDirectory implements Iterable<File>
         if (names == null) {
             scan();
         }
-        
+
         return names;
     }
-    
+
     private void recurse(File f, Collection<File> files)
     {
         if (f.isFile()) {
@@ -98,7 +98,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
     {
         return asFiles(getNames()).iterator();
     }
-    
+
     private Iterable<File> asFiles(Iterable<String> names)
     {
         Collection<File> files = new ArrayList<File>();
@@ -107,38 +107,36 @@ public class AlbumArtworkDirectory implements Iterable<File>
         }
         return Collections.unmodifiableCollection(files);
     }
-    
+
     public Iterable<File> getUnused()
     {
-        scan();
-        
-        Collection<String> c = new HashSet<String>(names);
+        Collection<String> c = new HashSet<String>(getNames());
         c.removeAll(used);
-        
+
         List<String> inOrder = new ArrayList<String>(c);
         Collections.sort(inOrder);
         return asFiles(inOrder);
     }
-    
+
     public File getCache(Library l, Artwork art)
     {
         byte[] artId = art.getPersistentId();
-        
+
         return get(l, ArtworkFile.Directory.Cache, artId);
     }
-    
+
     public File getDownload(Library l, Track t)
     {
         byte[] artId = t.getAlbumPersistentId();
-        
+
         get(l, ArtworkFile.Directory.Cache, artId);
         return get(l, ArtworkFile.Directory.Download, artId);
     }
-    
+
     public File get(Library l, Track t)
     {
         byte[] artId = t.getAlbumPersistentId();
-        
+
         File f = get(l, ArtworkFile.Directory.Download, artId);
         if (f != null && f.isFile()) {
             return f;
@@ -146,7 +144,7 @@ public class AlbumArtworkDirectory implements Iterable<File>
             return get(l, ArtworkFile.Directory.Cache, artId);
         }
     }
-    
+
     public File get(Library l, ArtworkFile.Directory type, byte[] artId)
     {
         if (artId == null) {
@@ -154,11 +152,11 @@ public class AlbumArtworkDirectory implements Iterable<File>
         }
 
         ArtworkFile af = new ArtworkFile(type, artId, 2);
-        
+
         String f = af.toString(l.getLibraryPersistentId());
-        
+
 //        ArtworkFile af1 = new ArtworkFile(type, artId, 1);
-//        
+//
 //        String f1 = af1.toString(l.getLibraryPersistentId());
 //
 //        if (getNames().contains(f1)) {
@@ -167,9 +165,9 @@ public class AlbumArtworkDirectory implements Iterable<File>
 //            f = null;
 //            return null;
 //        }
-        
+
         used.add(f);
-        
+
         return new File(dir, f);
     }
 }
