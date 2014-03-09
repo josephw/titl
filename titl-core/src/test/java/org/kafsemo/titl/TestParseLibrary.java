@@ -614,4 +614,16 @@ public class TestParseLibrary
         assertEquals(Util.fromString("hdsm"), input.readInt());
         assertEquals(0x00000001, input.readInt());
     }
+
+    @Test
+    public void parseEmptyLibraryFromOsX() throws IOException, ItlException
+    {
+        File f = new File("src/test/resources/Empty OS X iTunes 11.1.5 Library.itl");
+
+        Library lib = ParseLibrary.parse(f);
+        assertNotNull(lib);
+        assertEquals("11.1.5", lib.getVersion());
+        assertEquals("file://localhost/Users/joe/Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
+        assertEquals("C4409DDF7C1D6E21", Util.pidToString(lib.getLibraryPersistentId()));
+    }
 }
