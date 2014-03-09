@@ -18,7 +18,7 @@
 
 package org.kafsemo.titl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -35,15 +35,15 @@ public class TestUtil
         int hdfmInt = 1751410285;
         assertEquals("hdfm", Util.toString(hdfmInt));
     }
-    
+
     @Test
     public void testFromString() throws UnsupportedEncodingException
     {
         String s = "hdfm";
-        
+
         assertEquals(1751410285, Util.fromString(s));
     }
-    
+
     @Test
     public void isPlausibleIdentifier() throws UnsupportedEncodingException
     {
@@ -51,10 +51,10 @@ public class TestUtil
         assertTrue("Letters form a valid identifier", Util.isIdentifier("0123"));
         assertFalse("Non-alphanumeric characters are not a valid identifer",
                 Util.isIdentifier("xÄ½"));
-        
+
         assertFalse("The empty string is not a valid identifier", Util.isIdentifier(""));
     }
-    
+
     @Test
     public void testPidToString()
     {
@@ -64,7 +64,7 @@ public class TestUtil
 
         assertEquals("301496C163C0DF40", Util.pidToString(libraryPersistentId));
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void failsWithBadIdStringLength()
     {
@@ -76,14 +76,14 @@ public class TestUtil
     {
         Util.fromString("€€€€");
     }
-    
+
     @Test
     public void pathToUrl()
     {
         String p = "C:\\Users\\Joseph\\Music\\iTunes\\iTunes Music\\Podcasts\\CASH Music_ Kristin Hersh\\Fortune.mp3";
-        
+
         String url = Util.toUrl(p);
-        
+
         assertEquals("A Windows file path should be converted to a URL",
                 "file://localhost/C:/Users/Joseph/Music/iTunes/iTunes%20Music/Podcasts/CASH%20Music_%20Kristin%20Hersh/Fortune.mp3",
                 url);

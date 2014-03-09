@@ -13,7 +13,7 @@ public class TestInputImpl
     public void getPositionReflectsReading() throws IOException
     {
         Input in = new InputImpl(new ByteArrayInputStream(new byte[1024]));
-        
+
         assertEquals(0, in.getPosition());
         in.readUnsignedByte();
         assertEquals(1, in.getPosition());

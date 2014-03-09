@@ -18,7 +18,7 @@
 
 package org.kafsemo.titl;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class TestHohm
         0x00, 0x75, 0x00, 0x73,
         0x00, 0x69, 0x00, 0x63
     };
-    
+
     private static byte[] sampleLatin1Chunk = {
         0x68, 0x6f, 0x68, 0x6d,
         0x00, 0x00, 0x00, 0x18,
@@ -60,42 +60,42 @@ public class TestHohm
         0x6f, 0x70, 0x20, 0x52,
         0x61, 0x74, 0x65, 0x64
     };
-    
+
     @Test
     public void testHohmUtf16PlaylistTitle() throws IOException, ItlException
     {
         Input di = new InputImpl(new ByteArrayInputStream(sampleUtf16Chunk));
-        
+
         String type = Util.toString(di.readInt());
         assertEquals("hohm", type);
-        
+
         int length = di.readInt();
         assertEquals(24, length);
 
         assertEquals(60, di.readInt());
         assertEquals(0x64, di.readInt());
-        
+
         String val = ParseLibrary.readGenericHohm(di);
-        
+
         assertEquals("90\u2019s Music", val);
     }
-    
+
     @Test
     public void testHohmLatin1PlaylistTitle() throws IOException, ItlException
     {
         Input di = new InputImpl(new ByteArrayInputStream(sampleLatin1Chunk));
-        
+
         String type = Util.toString(di.readInt());
         assertEquals("hohm", type);
-        
+
         int length = di.readInt();
         assertEquals(24, length);
 
         assertEquals(52, di.readInt());
         assertEquals(0x64, di.readInt());
-        
+
         String val = ParseLibrary.readGenericHohm(di);
-        
+
         assertEquals("My Top Rated", val);
     }
 }
