@@ -586,4 +586,18 @@ public class TestParseLibrary
         assertEquals("00D1246314F75A0C", Util.pidToString(t.getAlbumPersistentId()));
         assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
     }
+
+    @Test
+    public void inputForReturnsAnInput() throws IllegalArgumentException, IOException
+    {
+        byte[] stream = {
+                'h', 'd', 's', 'm',
+                0, 0, 0, 1
+        };
+
+        Input input = ParseLibrary.inputFor(stream);
+        assertNotNull(input);
+        assertEquals(Util.fromString("hdsm"), input.readInt());
+        assertEquals(0x00000001, input.readInt());
+    }
 }

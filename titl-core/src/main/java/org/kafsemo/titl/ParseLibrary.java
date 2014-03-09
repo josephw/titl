@@ -91,14 +91,19 @@ public class ParseLibrary
 
         ParseLibrary pl = new ParseLibrary();
 
-        String path = pl.drain(new InputImpl(new ByteArrayInputStream(hdr.fileData)), hdr.fileData.length);
+        String path = pl.drain(inputFor(hdr.fileData), hdr.fileData.length);
 
 //        for (InputRange ir : pl.diagnostics) {
 //            System.out.println(ir);
 //        }
-        
+
         Library library = new Library(hdr, path, pl.playlists, pl.podcasts, pl.tracks, pl.resourcesWithArtwork);
         return library;
+    }
+
+    static Input inputFor(byte[] fileData)
+    {
+        return new InputImpl(new ByteArrayInputStream(fileData));
     }
 
     String drain(Input di, int totalLength) throws UnsupportedEncodingException, IOException, ItlException
