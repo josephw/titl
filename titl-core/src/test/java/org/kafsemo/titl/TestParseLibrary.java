@@ -48,7 +48,7 @@ public class TestParseLibrary extends TestCase
     public void testParseEmptyItunes80Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 8.0 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
         assertNotNull(lib);
         assertEquals("8.0", lib.getVersion());
@@ -58,14 +58,14 @@ public class TestParseLibrary extends TestCase
     public void testParseEmptyItunes801Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
         assertNotNull(lib);
         assertEquals("8.0.1", lib.getVersion());
         assertEquals("file://localhost/C:/Users/Joseph/Music/iTunes/iTunes%20Music/", lib.getMusicFolder());
 
         assertEquals("301496C163C0DF40", Util.pidToString(lib.getLibraryPersistentId()));
-        
+
         String[][] expectedPlaylists = {
                 {"Music", "38", "301496C163C0DF4B"},
                 {"Movies", "83", "301496C163C0DF4C"},
@@ -80,28 +80,28 @@ public class TestParseLibrary extends TestCase
                 {"Recently Added", "53", "301496C163C0DF46"},
                 {"Recently Played", "50", "301496C163C0DF45"},
                 {"Top 25 Most Played", "47", "301496C163C0DF44"},
-                
+
                 /* Expected, but not present in XML */
                 {"Rented Movies"},
                 {"Ringtones"},
-                
+
                 /* In XML, but not a playlist in the binary */
 //                "Library",
-                
+
                 {"####!####", null, "301496C163C0DF41"}
         };
-        
+
         List<String> expectedPlaylistNames = new ArrayList<String>(expectedPlaylists.length);
         for (String[] pla : expectedPlaylists) {
             expectedPlaylistNames.add(pla[0]);
         }
         Collections.sort(expectedPlaylistNames);
-        
+
         List<String> playlistNames = new ArrayList<String>(lib.getPlaylistNames());
         Collections.sort(playlistNames);
-        
+
         assertEquals(expectedPlaylistNames.toString(), playlistNames.toString());
-        
+
         /* Check IDs */
 //        Map<String, Integer> expectedIds = new HashMap<String, Integer>();
 //        for (String[] pla : expectedPlaylists) {
@@ -109,13 +109,13 @@ public class TestParseLibrary extends TestCase
 //                expectedIds.put(pla[0], Integer.parseInt(pla[1]));
 //            }
 //        }
-//        
+//
 //        for (Playlist pl : lib.getPlaylists()) {
 //            if(expectedIds.containsKey(pl.getTitle())) {
 //                assertEquals(expectedIds.get(pl.getTitle()).intValue(), pl.getId());
 //            }
 //        }
-        
+
         /* Check PPIDs */
         Map<String, String> expectedPpids = new HashMap<String, String>();
         for (String[] pla : expectedPlaylists) {
@@ -123,14 +123,14 @@ public class TestParseLibrary extends TestCase
                 expectedPpids.put(pla[0], pla[2]);
             }
         }
-        
+
         for (Playlist pl : lib.getPlaylists()) {
             if(expectedPpids.containsKey(pl.getTitle())) {
                 assertEquals("Checking PID for playlist: " + pl.getTitle(),
                         expectedPpids.get(pl.getTitle()), Util.pidToString(pl.getPpid()));
             }
         }
-        
+
         /* Check a single smart criteria */
         Playlist pl90sMusic = null;
         for (Playlist pl : lib.getPlaylists()) {
@@ -139,15 +139,15 @@ public class TestParseLibrary extends TestCase
             }
         }
         assertNotNull(pl90sMusic);
-        
+
         byte[] expectedSmartInfo = Base64.decode(
                   "AQEAAwAAAAIAAAAZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                 + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                 + "AAAAAA==");
-        
+
         assertEquals(Util.pidToString(expectedSmartInfo), Util.pidToString(pl90sMusic.smartInfo));
         assertTrue(Arrays.equals(expectedSmartInfo, pl90sMusic.smartInfo));
-        
+
         byte[] expectedSmartCriteria = Base64.decode("U0xzdAABAAEAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                 + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
                 + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcAAAEAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -156,25 +156,25 @@ public class TestParseLibrary extends TestCase
                 + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAB"
                 + "AAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA"
                 + "AAAAAAAA");
-        
+
         assertEquals(Util.pidToString(expectedSmartCriteria), Util.pidToString(pl90sMusic.smartCriteria));
         assertTrue(Arrays.equals(expectedSmartCriteria, pl90sMusic.smartCriteria));
     }
-    
+
     public void testMinimalLibraryTracksLoaded() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-        
+
         // Song
         Collection<Track> tracks = lib.getTracks();
         assertNotNull(tracks);
-        
+
         assertEquals("The library should contain all tracks from the podcast",
                 13, tracks.size());
     }
-    
+
     private static Track getTrack(Collection<Track> tracks, int trackId)
     {
         for (Track tt : tracks) {
@@ -186,7 +186,7 @@ public class TestParseLibrary extends TestCase
         fail("Track ID " + trackId + " not found");
         return null;
     }
-    
+
     private static Playlist getPlaylist(Collection<Playlist> pls, String name)
     {
         for (Playlist pl : pls) {
@@ -194,16 +194,16 @@ public class TestParseLibrary extends TestCase
                 return pl;
             }
         }
-        
+
         fail("Playlist " + name + " not found");
         return null;
     }
     public void testMinimalLibraryLocalTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-        
+
         Track t = getTrack(lib.getTracks(), 246);
 
         assertNotNull("The track list should contain track ID 246", t);
@@ -228,30 +228,30 @@ public class TestParseLibrary extends TestCase
 //        assertEquals("File", t.getTrackType());
 //        assertTrue(t.isPodcast());
 //        assertTrue(t.isUnplayed());
-        
+
         assertEquals("C:\\Users\\Joseph\\Music\\iTunes\\iTunes Music\\Podcasts\\CASH Music_ Kristin Hersh\\Fortune.mp3",
                 t.getLocation());
 //        assertEquals(4, t.getFileFolderCount());
 //        assertEquals(1, t.getLibraryFolderCount());
-        
+
         /* Extra fields */
         assertEquals(0, t.getRating());
         assertEquals("http://s3.amazonaws.com/cash_users/kristinhersh/Speedbath/Fortune/Fortune_256.mp3", t.getUrl());
-        
+
         assertEquals("kristin hersh, fortune, cash music", t.getItunesKeywords());
         assertEquals("http://kristinhersh.cashmusic.org", t.getItunesSubtitle());
 //        assertEquals("Kristin Hersh", t.getAuthor());
-        
+
         assertEquals("file://localhost/C:/Users/Joseph/Music/iTunes/iTunes%20Music/Podcasts/CASH%20Music_%20Kristin%20Hersh/Fortune.mp3",
                 t.getLocalUrl());
     }
-    
+
     public void testMinimalLibraryUndownloadedTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-        
+
         Track t = getTrack(lib.getTracks(), 170);
 
         assertNotNull("The track list should contain track called Mississippi Kite", t);
@@ -272,100 +272,100 @@ public class TestParseLibrary extends TestCase
 //        assertEquals("File", t.getTrackType());
 //        assertTrue(t.isPodcast());
 //        assertTrue(t.isUnplayed());
-        
+
         assertNull(t.getLocation());
 //        assertEquals(4, t.getFileFolderCount());
 //        assertEquals(1, t.getLibraryFolderCount());
-        
+
         /* Extra fields */
         assertEquals(0, t.getRating());
         assertEquals("http://s3.amazonaws.com/cash_users/kristinhersh/Speedbath/MississippiKite/MississippiKite_256.mp3", t.getUrl());
-        
+
         assertEquals("kristin hersh, mississippi kite, cash music", t.getItunesKeywords());
         assertEquals("http://kristinhersh.cashmusic.org", t.getItunesSubtitle());
 //        assertEquals("Kristin Hersh", t.getAuthor());
-        
+
         assertEquals("http://s3.amazonaws.com/cash_users/kristinhersh/Speedbath/MississippiKite/MississippiKite_256.mp3",
                 t.getLocalUrl());
     }
-    
+
     public void testMinimalLibraryPodcast() throws Exception
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-    
+
         // Podcast
         Collection<Podcast> podcasts = lib.getPodcasts();
         assertNotNull(podcasts);
         assertEquals(1, podcasts.size());
-        
+
         Podcast p = podcasts.iterator().next();
         assertEquals("http://feeds.cashmusic.org/kristinhersh/", p.getPodcastLocation());
         assertEquals("CASH Music: Kristin Hersh", p.getPodcastTitle());
-        
+
         Set<String> expectedAuthors = new HashSet<String>(Arrays.asList("Kristin Hersh", "Xiu Xiu + Kristin Hersh"));
-        
+
         assertEquals(expectedAuthors, new HashSet<String>(p.getPodcastAuthors()));
-        
+
         HohmPodcast hp = getPlaylist(lib.getPlaylists(), "Podcasts").getHohmPodcast();
-        
+
         assertEquals("http://kristinhersh.cashmusic.org", hp.link);
         assertEquals("http://feeds.cashmusic.org/kristinhersh/kristinhersh.jpg", hp.aurl);
         assertEquals("http://feeds.cashmusic.org/kristinhersh/", hp.url);
 
         Track podcastTrack = getTrack(lib.getTracks(), 152);
-        
+
         assertEquals("Kristin Hersh is releasing a new album serially, one track per month, via her project at CASH Music. This podcast delivers each month's track, along with any other music she releases through CASH.",
                 podcastTrack.getItunesSummary());
-        
+
         assertEquals("The music from Kristin Hersh's CASH Music project", podcastTrack.getItunesSubtitle());
     }
-    
+
     public void testMinimalLibraryPlaylist() throws Exception
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-    
+
         // Playlist
         Collection<Playlist> playlists = lib.getPlaylists();
         assertFalse(playlists.isEmpty());
 
         Playlist library = null;
-        
+
         for (Playlist pl : playlists) {
             if (pl.getTitle().equals("####!####")) {
                 library = pl;
             }
         }
-        
+
         assertNotNull("The Library playlist should be found", library);
-        
+
         List<Integer> items = library.getItems();
         assertEquals(Collections.singletonList(246), items);
     }
-    
+
     public void testMinimalLibraryTracksLoaded2() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-        
+
         // Song
         Collection<Track> tracks = lib.getTracks();
         assertNotNull(tracks);
-        
+
         assertEquals("The library should contain all tracks from the podcast",
                 4, tracks.size());
     }
-    
+
     public void testMinimalLibraryLocalTrackTMBG() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-        
+
         Track t = getTrack(lib.getTracks(), 194);
 
         assertNotNull("The track list should contain track ID 194", t);
@@ -390,63 +390,63 @@ public class TestParseLibrary extends TestCase
 //        assertEquals("File", t.getTrackType());
 //        assertTrue(t.isPodcast());
 //        assertTrue(t.isUnplayed());
-        
+
         assertEquals("C:\\Users\\Joseph\\Music\\iTunes\\iTunes Music\\Podcasts\\They Might Be Giants Podcast\\TMBG Podcast 36B.mp3",
                 t.getLocation());
 //        assertEquals(4, t.getFileFolderCount());
 //        assertEquals(1, t.getLibraryFolderCount());
-        
+
         /* Extra fields */
         assertEquals(0, t.getRating());
         assertEquals("http://www.tmbg.com/_media/_pod/TMBGPodcast36B.mp3", t.getUrl());
-        
+
         assertEquals("They Might Be Giants, TMBG, John Flansburgh, John Linnell, Birdhouse in Your Soul, Istanbul, Homestar ", t.getItunesKeywords());
         assertEquals("Hosted by public radio's Duke of Dead Air-Cecil Portesque-broadcasting from a secret, very futuristic location. Includes exclusive They Might Be Giants recordings, previews and rarities.", t.getItunesSubtitle());
 //        assertEquals("Kristin Hersh", t.getAuthor());
-        
+
         assertEquals("file://localhost/C:/Users/Joseph/Music/iTunes/iTunes%20Music/Podcasts/They%20Might%20Be%20Giants%20Podcast/TMBG%20Podcast%2036B.mp3",
                 t.getLocalUrl());
     }
-    
+
     public void testMinimalLibraryPodcast2() throws Exception
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
-        
+
         Library lib = ParseLibrary.parse(f);
-    
+
         // Podcast
         Collection<Podcast> podcasts = lib.getPodcasts();
         assertNotNull(podcasts);
         assertEquals(1, podcasts.size());
-        
+
         Podcast p = podcasts.iterator().next();
         assertEquals("http://www.tmbg.com/_media/_pod/podcast.xml", p.getPodcastLocation());
         assertEquals("They Might Be Giants Podcast", p.getPodcastTitle());
-        
+
         Set<String> expectedAuthors = new HashSet<String>(Arrays.asList("They Might Be Giants"));
         assertEquals(expectedAuthors, new HashSet<String>(p.getPodcastAuthors()));
 
-        
+
         HohmPodcast hp = getPlaylist(lib.getPlaylists(), "Podcasts").getHohmPodcast();
-        
+
         assertEquals("http://www.tmbg.com", hp.link);
         assertEquals("http://www.tmbg.com/_media/_pod/TMBGPODCAST.jpg", hp.aurl);
         assertEquals("http://www.tmbg.com/_media/_pod/podcast.xml", hp.url);
-        
+
         Track podcastTrack = getTrack(lib.getTracks(), 156);
-        
+
         assertEquals("Direct from Brooklyn's own They Might Be Giants, this is the only authorized and official podcast from the band. Often imitated, never remunerated. Specializing in original, live and/or rare material from the band, please enjoy TMBG's finest podcast!",
                 podcastTrack.getItunesSummary());
-        
+
         assertEquals("The official podcast of They Might Be Giants.", podcastTrack.getItunesSubtitle());
-        
+
         assertEquals("http://www.tmbg.com/_media/_pod/podcast.xml", podcastTrack.getLocalUrl());
     }
 
     /**
      * Libraries in this release are compressed. This test confirms that decompression
      * works.
-     * 
+     *
      * @throws IOException
      * @throws ItlException
      */
@@ -462,7 +462,7 @@ public class TestParseLibrary extends TestCase
 
     /**
      * Another test for a new release.
-     * 
+     *
      * @throws IOException
      * @throws ItlException
      */
@@ -475,10 +475,10 @@ public class TestParseLibrary extends TestCase
         assertEquals("9.2", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
-    
+
     /**
      * A new release with a new obfuscation method.
-     * 
+     *
      * @throws IOException
      * @throws ItlException
      */
@@ -491,10 +491,10 @@ public class TestParseLibrary extends TestCase
         assertEquals("10.0", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
-    
+
     /**
      * A new point release.
-     * 
+     *
      * @throws IOException
      * @throws ItlException
      */
@@ -507,7 +507,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("10.0.1", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
-    
+
     public void testParseEmptyItunes10_1Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.1 Library.itl");
@@ -518,7 +518,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
         assertEquals("44328F10E636D81E", Util.pidToString(lib.getLibraryPersistentId()));
     }
-    
+
     public void testParseEmptyItunes10_2Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.2 Library.itl");
@@ -529,7 +529,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
         assertEquals("3A587ACD4CC64C31", Util.pidToString(lib.getLibraryPersistentId()));
     }
-    
+
     public void testParseItunes10_2LibraryWithSingleTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 10.2.2 Library with single track.itl");
@@ -539,18 +539,18 @@ public class TestParseLibrary extends TestCase
         assertEquals("10.2.2", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
         assertEquals("35F8CA737C067601", Util.pidToString(lib.getLibraryPersistentId()));
-        
+
         Collection<Track> tracks = lib.getTracks();
         assertEquals(1, tracks.size());
-        
+
         Track t = getTrack(tracks, 221);
-        
+
         assertEquals("Here Sometimes", t.getName());
         assertNull(t.getAlbumPersistentId());
-        
+
         assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
     }
-    
+
     public void testParseItunes10_2LibraryWithTrackWithArtwork() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 10.2.2 Library with single track with artwork.itl");
@@ -560,13 +560,13 @@ public class TestParseLibrary extends TestCase
         assertEquals("10.2.2", lib.getVersion());
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
         assertEquals("35F8CA737C067601", Util.pidToString(lib.getLibraryPersistentId()));
-        
+
         Collection<Track> tracks = lib.getTracks();
         assertEquals(1, tracks.size());
-        
+
         // XXX Why is this 64 now, and still 221 in the XML?
         Track t = getTrack(tracks, 64);
-        
+
         assertEquals("Here Sometimes", t.getName());
         assertEquals("00D1246314F75A0C", Util.pidToString(t.getAlbumPersistentId()));
         assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));

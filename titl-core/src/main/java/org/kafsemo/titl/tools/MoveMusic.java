@@ -30,7 +30,7 @@ import org.kafsemo.titl.ProcessLibrary;
  * <p>A command-line tool to process a music library and move all music files from one directory
  * to another. If you move the files on disk at the same time, processing with this tool
  * will make the app pick them up from the new location.</p>
- * 
+ *
  * <p>The <code>--use-urls</code> switch will convert the URL rather than
  * the filename of each track. On Windows, the default (filename) works.</p>
  *
@@ -55,10 +55,10 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         if (args.length < 3) {
             return null;
         }
-        
+
         boolean useUrls = false;
         int firstPath;
-        
+
         if (args[0].startsWith("--")) {
             firstPath = 1;
             if (args[0].equals("--use-urls")) {
@@ -69,26 +69,26 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         } else {
             firstPath = 0;
         }
-        
+
         if (args.length - firstPath != 3) {
             return null;
         }
-        
+
         MoveMusic mm = new MoveMusic(args[firstPath], args[firstPath + 1], args[firstPath + 2]);
         mm.setUseUrls(useUrls);
         return mm;
     }
-    
+
     String getLibraryFilename()
     {
         return libraryFilename;
     }
-    
+
     String getOrigDir()
     {
         return origDir;
     }
-    
+
     String getDestDir()
     {
         return destDir;
@@ -98,12 +98,12 @@ public class MoveMusic implements ProcessLibrary.StringConverter
     {
         return useUrls;
     }
-    
+
     void setUseUrls(boolean u)
     {
         useUrls = u;
     }
-    
+
     public static void main(String[] args) throws IOException, ItlException
     {
         MoveMusic mm = fromArgs(args);
