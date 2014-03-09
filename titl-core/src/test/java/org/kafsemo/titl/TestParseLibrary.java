@@ -18,6 +18,13 @@
 
 package org.kafsemo.titl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,21 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.kafsemo.titl.Base64;
-import org.kafsemo.titl.Dates;
-import org.kafsemo.titl.HohmPodcast;
-import org.kafsemo.titl.ItlException;
-import org.kafsemo.titl.Library;
-import org.kafsemo.titl.ParseLibrary;
-import org.kafsemo.titl.Playlist;
-import org.kafsemo.titl.Podcast;
-import org.kafsemo.titl.Track;
-import org.kafsemo.titl.Util;
+import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class TestParseLibrary extends TestCase
+public class TestParseLibrary
 {
+    @Test
     public void testParseEmptyItunes80Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 8.0 Library.itl");
@@ -55,6 +52,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("file://localhost/C:/Users/Joseph/Music/iTunes/iTunes%20Music/", lib.getMusicFolder());
     }
 
+    @Test
     public void testParseEmptyItunes801Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 8.0.1 Library.itl");
@@ -161,6 +159,7 @@ public class TestParseLibrary extends TestCase
         assertTrue(Arrays.equals(expectedSmartCriteria, pl90sMusic.smartCriteria));
     }
 
+    @Test
     public void testMinimalLibraryTracksLoaded() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
@@ -198,6 +197,8 @@ public class TestParseLibrary extends TestCase
         fail("Playlist " + name + " not found");
         return null;
     }
+
+    @Test
     public void testMinimalLibraryLocalTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
@@ -246,6 +247,7 @@ public class TestParseLibrary extends TestCase
                 t.getLocalUrl());
     }
 
+    @Test
     public void testMinimalLibraryUndownloadedTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
@@ -289,6 +291,7 @@ public class TestParseLibrary extends TestCase
                 t.getLocalUrl());
     }
 
+    @Test
     public void testMinimalLibraryPodcast() throws Exception
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
@@ -322,6 +325,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("The music from Kristin Hersh's CASH Music project", podcastTrack.getItunesSubtitle());
     }
 
+    @Test
     public void testMinimalLibraryPlaylist() throws Exception
     {
         File f = new File("src/test/resources/Minimal iTunes 8.0.1 Library.itl");
@@ -346,6 +350,7 @@ public class TestParseLibrary extends TestCase
         assertEquals(Collections.singletonList(246), items);
     }
 
+    @Test
     public void testMinimalLibraryTracksLoaded2() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
@@ -360,6 +365,7 @@ public class TestParseLibrary extends TestCase
                 4, tracks.size());
     }
 
+    @Test
     public void testMinimalLibraryLocalTrackTMBG() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
@@ -408,6 +414,7 @@ public class TestParseLibrary extends TestCase
                 t.getLocalUrl());
     }
 
+    @Test
     public void testMinimalLibraryPodcast2() throws Exception
     {
         File f = new File("src/test/resources/iTunes 8.0.1 Library TMBG.itl");
@@ -450,6 +457,7 @@ public class TestParseLibrary extends TestCase
      * @throws IOException
      * @throws ItlException
      */
+    @Test
     public void testParseEmptyItunes9Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 9.0.3 Library.itl");
@@ -466,6 +474,7 @@ public class TestParseLibrary extends TestCase
      * @throws IOException
      * @throws ItlException
      */
+    @Test
     public void testParseEmptyItunes9_2Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 9.2.0 Library.itl");
@@ -482,6 +491,7 @@ public class TestParseLibrary extends TestCase
      * @throws IOException
      * @throws ItlException
      */
+    @Test
     public void testParseEmptyItunes10_0Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.0 Library.itl");
@@ -498,6 +508,7 @@ public class TestParseLibrary extends TestCase
      * @throws IOException
      * @throws ItlException
      */
+    @Test
     public void testParseEmptyItunes10_0_1Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.0.1 Library.itl");
@@ -508,6 +519,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("file://localhost/C:/Documents%20and%20Settings/joe/My%20Documents/My%20Music/iTunes/iTunes%20Media/", lib.getMusicFolder());
     }
 
+    @Test
     public void testParseEmptyItunes10_1Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.1 Library.itl");
@@ -519,6 +531,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("44328F10E636D81E", Util.pidToString(lib.getLibraryPersistentId()));
     }
 
+    @Test
     public void testParseEmptyItunes10_2Library() throws IOException, ItlException
     {
         File f = new File("src/test/resources/Empty iTunes 10.2 Library.itl");
@@ -530,6 +543,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("3A587ACD4CC64C31", Util.pidToString(lib.getLibraryPersistentId()));
     }
 
+    @Test
     public void testParseItunes10_2LibraryWithSingleTrack() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 10.2.2 Library with single track.itl");
@@ -551,6 +565,7 @@ public class TestParseLibrary extends TestCase
         assertEquals("C14C9C03E7DBB0E7", Util.pidToString(t.getPersistentId()));
     }
 
+    @Test
     public void testParseItunes10_2LibraryWithTrackWithArtwork() throws IOException, ItlException
     {
         File f = new File("src/test/resources/iTunes 10.2.2 Library with single track with artwork.itl");

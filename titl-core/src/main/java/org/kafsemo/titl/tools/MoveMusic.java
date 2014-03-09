@@ -110,6 +110,7 @@ public class MoveMusic implements ProcessLibrary.StringConverter
         if (mm == null) {
             System.err.println("Usage: MoveMusic [--use-urls] <iTunes Library.itl> <source directory> <destination directory>");
             System.exit(5);
+            return; // Unreachable; keep Eclipse NPE detection happy
         }
 
         /* Warn if the paths are specified differently */
